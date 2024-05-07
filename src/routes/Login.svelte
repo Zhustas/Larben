@@ -6,7 +6,9 @@
     event.preventDefault();
   }
 
-  function register() {}
+  function register() {
+    window.location = "/register";
+  }
 </script>
 
 <h1>Larben</h1>
