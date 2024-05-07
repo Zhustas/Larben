@@ -18,7 +18,7 @@ function serve() {
       // Spawn a child server process
       server = require("child_process").spawn(
         "npm",
-        ["run", "start", "--", "--dev"],
+        ["run", "start", "--", "--dev", "--single"],
         {
           stdio: ["ignore", "inherit", "inherit"],
           shell: true,
@@ -41,7 +41,10 @@ export default {
   },
   plugins: [
     svelte({
-      include: "src/**/*.svelte",
+      include: [
+        "src/**/*.svelte",
+        "node_modules/svelte-routing/src/**/*.svelte",
+      ],
     }),
     resolve({ browser: true }),
     serve(),
