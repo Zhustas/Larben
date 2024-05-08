@@ -1,6 +1,13 @@
+"use strict";
+
 export default class Map {
   #MAPS_API_KEY;
   #map;
+  #mapOptions = {
+    zoom: 7,
+    center: { lat: 55.1694, lng: 23.8813 },
+    mapId: "MAP_ID",
+  };
 
   constructor(MAPS_API_KEY) {
     this.#MAPS_API_KEY = MAPS_API_KEY;
@@ -50,14 +57,14 @@ export default class Map {
   async initMap() {
     const { Map } = await google.maps.importLibrary("maps");
 
-    this.#map = new Map(document.getElementById("map"), {
-      zoom: 4,
-      center: { lat: -25.344, lng: 131.031 },
-      mapId: "MAP_ID",
-    });
+    this.#map = new Map(document.getElementById("map"), this.#mapOptions);
 
-    this.#map.addListener("click", (mapsMouseEvent) => {
-      this.addMarker(mapsMouseEvent.latLng.toJSON());
+    let latLng;
+    this.#map.addListener("click", async (mapsMouseEvent) => {
+      latLng = mapsMouseEvent.latLng.toJSON();
+      if (await this.isPointInLithuania(latLng)) {
+        this.addMarker(latLng);
+      }
     });
   }
 
@@ -68,6 +75,29 @@ export default class Map {
       map: this.#map,
       position: latLng,
     });
+  }
+
+  async isPointInLithuania({ lat: latitude, lng: longitude }) {
+    let url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${
+      this.#MAPS_API_KEY
+    }`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+    const results = data.results;
+
+    for (let component of results) {
+      for (let type of component.types) {
+        if (type === "country") {
+          for (let address_component of component.address_components) {
+            if (address_component.short_name === "LT") {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
   }
 }
 
