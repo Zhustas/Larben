@@ -1,7 +1,9 @@
 import svelte from "rollup-plugin-svelte";
 import resolve from "@rollup/plugin-node-resolve";
+import replace from "@rollup/plugin-replace";
 import livereload from "rollup-plugin-livereload";
 import css from "rollup-plugin-css-only";
+import "dotenv/config";
 
 function serve() {
   // Keep a reference to a spawned server process
@@ -51,6 +53,10 @@ export default {
     livereload("public"),
     css({
       output: "bundle.css",
+    }),
+    replace({
+      preventAssignment: true,
+      "process.env.MAPS_API_KEY": JSON.stringify(process.env.MAPS_API_KEY),
     }),
   ],
 };

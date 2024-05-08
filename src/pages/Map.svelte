@@ -1,5 +1,5 @@
 <script>
-  let API_KEY = ""; // Config.json
+  let MAPS_API_KEY = process.env.MAPS_API_KEY;
 
   ((g) => {
     var h,
@@ -36,7 +36,7 @@
       ? console.warn(p + " only loads once. Ignoring:", g)
       : (d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)));
   })({
-    key: API_KEY,
+    key: MAPS_API_KEY,
     v: "weekly",
   });
 
