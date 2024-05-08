@@ -15,7 +15,7 @@
 <p>Sveiki atvykę į Lietuvos Archeologijos Bendruomenę!</p>
 <p>Įveskite vartojo vardą ir slaptažodį, kad prisijungtumėte.</p>
 
-<form>
+<form autocomplete="on">
   <label for="username">Vartotojo vardas</label>
   <input bind:value={username} type="text" id="username" name="username" />
 
