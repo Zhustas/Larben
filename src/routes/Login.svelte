@@ -4,6 +4,30 @@
 
   function login(event) {
     event.preventDefault();
+
+    // Convert username and password into object
+    const user = {
+      USERNAME: username,
+      PASSWORD: password,
+    };
+
+    // Convert to json
+    const userString = JSON.stringify(user);
+
+    // Send to /getUserByCredentials with POST method
+    doPOST(userString);
+  }
+
+  function doPOST(userString) {
+    const hr = new XMLHttpRequest();
+    hr.open("POST", "http://localhost:3000/getUserByCredentials");
+    hr.setRequestHeader("Content-Type", "application/json");
+    hr.send(userString);
+    hr.onload = () => {
+      if (hr.status === 200) {
+        window.location = "/main";
+      }
+    };
   }
 
   function register() {
