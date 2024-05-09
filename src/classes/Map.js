@@ -2,6 +2,7 @@
 
 export default class Map {
   #MAPS_API_KEY;
+  #GEOCODING_API_KEY;
   #map;
   #mapOptions = {
     zoom: 7,
@@ -9,8 +10,9 @@ export default class Map {
     mapId: "MAP_ID",
   };
 
-  constructor(MAPS_API_KEY) {
+  constructor(MAPS_API_KEY, GEOCODING_API_KEY) {
     this.#MAPS_API_KEY = MAPS_API_KEY;
+    this.#GEOCODING_API_KEY = GEOCODING_API_KEY;
   }
 
   loadMapsAPI() {
@@ -59,9 +61,8 @@ export default class Map {
 
     this.#map = new Map(document.getElementById("map"), this.#mapOptions);
 
-    let latLng;
     this.#map.addListener("click", async (mapsMouseEvent) => {
-      latLng = mapsMouseEvent.latLng.toJSON();
+      let latLng = mapsMouseEvent.latLng.toJSON();
       if (await this.isPointInLithuania(latLng)) {
         this.addMarker(latLng);
       }
@@ -79,7 +80,7 @@ export default class Map {
 
   async isPointInLithuania({ lat: latitude, lng: longitude }) {
     let url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${
-      this.#MAPS_API_KEY
+      this.#GEOCODING_API_KEY
     }`;
 
     const response = await fetch(url);

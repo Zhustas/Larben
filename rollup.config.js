@@ -57,6 +57,9 @@ export default {
     replace({
       preventAssignment: true,
       "process.env.MAPS_API_KEY": JSON.stringify(process.env.MAPS_API_KEY),
+      "process.env.GEOCODING_API_KEY": JSON.stringify(
+        process.env.GEOCODING_API_KEY
+      ),
     }),
   ],
 };
