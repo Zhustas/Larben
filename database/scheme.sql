@@ -14,3 +14,18 @@ CREATE TABLE Tokens (
     TOKEN         TEXT     NOT NULL,
     TOKEN_CREATED DATETIME NOT NULL
 );
+
+CREATE TABLE Posts (
+    ID            INTEGER  PRIMARY KEY AUTOINCREMENT,
+    -- Kol kas "Posts" tegu turi galimybę tik įrašyti tekstą (o ne pridėti paveikslėlio pvz)
+    USER_ID       INTEGER  NOT NULL,
+    TEXT          TEXT     NOT NULL,
+    POST_DATETIME DATETIME NOT NULL,
+    LIKES         INTEGER  NOT NULL
+    -- Vėliau pridėti
+    -- FOREIGN KEY (USER_ID) REFERENCES Users(ID) ON DELETE CASCADE
+);
+
+-- DROP TABLE Users;
+-- DROP TABLE Tokens;
+-- DROP TABLE Posts;

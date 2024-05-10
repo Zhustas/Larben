@@ -7,24 +7,25 @@
   import Guild from "./pages/Guild.svelte";
   import Error from "./routes/Error.svelte";
 
-  import { onMount } from "svelte";
+  // import { onMount } from "svelte";
 
-  onMount(() => {
-    const { pathname } = window.location;
+  // onMount(() => {
+  //   const { pathname } = window.location;
 
-    console.log(pathname);
-    // if (pathname !== "/") {
-    //   window.location = "/";
-    // }
-  });
+  //   console.log(pathname);
+  //   // if (pathname !== "/") {
+  //   //   window.location = "/";
+  //   // }
+  // });
 </script>
 
 <Router>
+  <!-- <Route path="/" component={Crier} /> -->
   <Route path="/" component={Login} />
   <Route path="/register" component={Register} />
   <Route path="/main" component={Main} />
 
-  <Route path="/error" component={Error} />
+  <!-- <Route path="/error" component={Error} /> -->
 
   <!-- For testing "stores" -->
   <!-- <Route path="/crier" component={Crier} />
