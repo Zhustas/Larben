@@ -4,11 +4,6 @@ const sqlite3 = require("sqlite3");
 const crypto = require("crypto-js");
 const dotenv = require("dotenv").config();
 
-const app = express();
-const port = 3000;
-const jsonParser = bodyParser.json();
-const AES_KEY = process.env.AES_KEY;
-
 class Database {
   #filename;
   #database;
@@ -22,14 +17,18 @@ class Database {
       if (err) {
         return console.error(err.message);
       }
+      console.log("Database opened");
     });
   }
 
+  // ******************************************* GET METHODS ********************************
+
   getUsers(res) {
-    this.#database?.all(`SELECT * FROM Users`, (err, rows) => {
+    this.#database?.all("SELECT * FROM Users", (err, rows) => {
       if (err) {
         res.status(500).json({ error: "Internal server error" });
       }
+
       rows = [
         {
           identification: crypto.lib.WordArray.random(32).toString(),
@@ -39,6 +38,27 @@ class Database {
       res.json(rows);
     });
   }
+
+  getPosts(res) {
+    this.#database?.all("SELECT * FROM Posts", (err, rows) => {
+      if (err) {
+        res.status(500).json({ error: "Internal server error" });
+      }
+
+      if (rows) {
+        rows = [
+          {
+            identification: crypto.lib.WordArray.random(32).toString(),
+          },
+          ...rows,
+        ];
+        res.json(rows);
+      }
+    });
+  }
+
+  // ****************************************************************************************
+  // ******************************************* POST METHODS *******************************
 
   checkCredentials(req, res) {
     // Get username and password
@@ -86,14 +106,46 @@ class Database {
     });
   }
 
+  insertPost(req, res) {
+    // Get post object from json
+    const post = req.body;
+
+    // Create SQL text
+    const sql = `
+      INSERT INTO Posts (USER_ID, TEXT, POST_DATETIME, LIKES)
+      VALUES (?, ?, ?, ?);
+    `;
+
+    // Get only values from post object
+    const values = Object.values(post).map((value) => value);
+
+    // Insert post
+    this.#database.run(sql, values, (err) => {
+      if (err) {
+        return console.error(err.message);
+      }
+
+      res.send("Ok");
+      console.log("Post added");
+    });
+  }
+
+  // ****************************************************************************************
+
   close() {
     this.#database?.close((err) => {
       if (err) {
         return console.error(err.message);
       }
+      console.log("Database closed");
     });
   }
 }
+
+const app = express();
+const port = 3000;
+const jsonParser = bodyParser.json();
+const AES_KEY = process.env.AES_KEY;
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
@@ -105,27 +157,46 @@ app.use((req, res, next) => {
   next();
 });
 
+// ******************************************* POST METHODS *******************************
+
 app.get("/users", jsonParser, (req, res) => {
-  const db = new Database("database/larben.db");
-  db.open();
-  db.getUsers(res);
-  db.close();
+  database.getUsers(res);
 });
 
+app.get("/posts", jsonParser, (req, res) => {
+  database.getPosts(res);
+});
+
+// ******************************************************************************************
+// ******************************************* POST METHODS *********************************
+
 app.post("/register", jsonParser, (req, res) => {
-  const db = new Database("database/larben.db");
-  db.open();
-  db.insertUser(req, res);
-  db.close();
+  database.insertUser(req, res);
 });
 
 app.post("/getUserByCredentials", jsonParser, (req, res) => {
-  const db = new Database("database/larben.db");
-  db.open();
-  db.checkCredentials(req, res);
-  db.close();
+  database.checkCredentials(req, res);
 });
 
-app.listen(port, () => {
+app.post("/insertPost", jsonParser, (req, res) => {
+  database.insertPost(req, res);
+});
+
+// ******************************************************************************************
+
+function gracefulShutdown() {
+  database.close();
+
+  console.log("Closing server");
+  server.close();
+}
+
+const database = new Database("database/larben.db");
+database.open();
+
+const server = app.listen(port, () => {
   console.log(`Larben is listening on port ${port}`);
 });
+
+process.on("SIGINT", gracefulShutdown);
+process.on("SIGTERM", gracefulShutdown);
