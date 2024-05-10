@@ -18,12 +18,18 @@
 
   function doPOST(userString) {
     const hr = new XMLHttpRequest();
-    hr.open("POST", "http://localhost:3000/getUserByCredentials");
+    hr.open("POST", "http://localhost:3000/checkCredentials");
     hr.setRequestHeader("Content-Type", "application/json");
+    hr.withCredentials = true;
     hr.send(userString);
     hr.onload = () => {
       if (hr.status === 200) {
-        window.location = "/main";
+        console.log(hr.response);
+        console.log(hr.responseText);
+        console.log(hr.responseURL);
+        console.log(hr.responseXML);
+        console.log(hr.getAllResponseHeaders());
+        // window.location = "/main";
       }
     };
   }
