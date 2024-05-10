@@ -9,10 +9,11 @@
 
   const errors = [];
 
-  function register(event) {
-    event.preventDefault();
-
+  function register() {
+    // Clear errors list
     errors.splice(0, errors.length);
+
+    // Check for errors in fields
     let ret = checkForErrorsAndReturn();
     if (ret !== 0) {
       showErrors(errors);
@@ -116,7 +117,9 @@
     name="passwordrepeat"
   />
 
-  <button on:click={register} id="reg-btn">Prisiregistruoti</button>
+  <button on:click|preventDefault={register} id="reg-btn"
+    >Prisiregistruoti</button
+  >
 </form>
 
 <style>
