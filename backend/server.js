@@ -58,18 +58,37 @@ class Database {
     });
   }
 
-  // ****************************************************************************************
-  // ******************************************* POST METHODS *******************************
-
-  checkSessionTokenForExpiration(res) {
-    // Get user ID
-    const { USER_ID } = res.body;
+  checkSessionTokenForExpiration(req, res) {
+    // Get sessionToken cookie
+    const { sessionToken } = req.cookies;
 
     // SQL for checking Session Token expiration
     const sql = `
-      SELECT * FROM SessionTokens WHERE
+      SELECT * FROM SessionTokens WHERE TOKEN = ?;
     `;
+
+    // Get row
+    this.#database.get(sql, [sessionToken], (err, row) => {
+      if (err) {
+        return console.error(err.message);
+      }
+
+      if (row) {
+        const { TOKEN_CREATED } = row;
+
+        if (TOKEN_CREATED + 1 * 60 * 1000 < new Date()) {
+          res.send("Expired");
+        } else {
+          res.send("Ok");
+        }
+      } else {
+        res.send("Don't exist");
+      }
+    });
   }
+
+  // ****************************************************************************************
+  // ******************************************* POST METHODS *******************************
 
   insertSessionToken(USER_ID) {
     // SQL for inserting Session Token
@@ -209,7 +228,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ******************************************* POST METHODS *******************************
+// ******************************************* GET METHODS *******************************
 
 app.get("/users", jsonParser, (req, res) => {
   database.getUsers(res);
@@ -217,6 +236,10 @@ app.get("/users", jsonParser, (req, res) => {
 
 app.get("/posts", jsonParser, (req, res) => {
   database.getPosts(res);
+});
+
+app.get("/checkSessionToken", (req, res) => {
+  database.checkSessionTokenForExpiration(req, res);
 });
 
 // ******************************************************************************************
@@ -241,6 +264,8 @@ function gracefulShutdown() {
 
   console.log("Closing server");
   server.close();
+
+  process.exit(0);
 }
 
 const database = new Database("database/larben.db");

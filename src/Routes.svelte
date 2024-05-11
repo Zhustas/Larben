@@ -14,16 +14,6 @@
     window.location = "/error";
   }
 
-  // console.log(Cookies.get());
-  // Cookies.set("x", "xx", { expires: 1 });
-  // Cookies.remove("cookie");
-
-  if (!getCookie("sessionToken")) {
-    window.location = "/login";
-  } else {
-    console.log(document.cookie);
-  }
-
   function getCookie(cName) {
     const name = cName + "=";
     const cDecoded = decodeURIComponent(document.cookie);
