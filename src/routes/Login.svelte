@@ -80,9 +80,8 @@
 
 <svelte:window on:load={cookieMessage} />
 
-<h1>Larben</h1>
-<p>Sveiki atvykę į Lietuvos Archeologijos Bendruomenę!</p>
-<p>Įveskite vartojo vardą ir slaptažodį, kad prisijungtumėte.</p>
+<h1 class="title">Larben</h1>
+<p class="welcome">Sveiki atvykę į Lietuvos Archeologijos Bendruomenę!</p>
 
 <form autocomplete="on">
   <label for="username">Vartotojo vardas</label>
@@ -94,7 +93,7 @@
   <button on:click|preventDefault={login} id="login-btn">Prisijungti</button>
 </form>
 
-<hr />
+<!-- <hr /> -->
 <div class="bot-region">
   <p>Neturi paskyros? Spausk registracijos mygtuką.</p>
   <button on:click={register} id="reg-btn">Registruotis</button>
@@ -116,86 +115,112 @@
 </div>
 
 <style>
+  /* General Styling */
   label {
-    display: block;
-    margin-bottom: 5px;
-  }
+  font-family: Arial, sans-serif;
+  margin: 5px;
+  padding: 0;
+  /*background-color: #f5f5f5; /* Light gray background */
+}
 
-  #password-lbl {
-    margin-top: 7px;
-  }
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 20px;
+}
 
-  #login-btn {
-    display: block;
-    margin: 1rem 0;
-  }
+.subcontainer {
+  width: 100%;
+  margin: auto;
+}
 
-  /* ******************************** Cookies ************************** */
-  #cookies {
-    padding: 0;
-    margin: 0;
-  }
+/* Header Styling */
+.title {
+  font-size: 2rem;
+  text-align: center;
+  margin-top: 150px;
+  color: #4e342e; /* Brown */
+}
 
-  .container {
-    width: 1600px;
-    margin: auto;
-  }
+.welcome {
+  font-size: 1.2rem;
+  text-align: center;
+  margin-top: 10px;
+  color: #4e342e; /* Brown */
+}
 
-  .subcontainer {
-    width: 85%;
-    margin: auto;
-  }
+.bot-region {
+  margin-left: 20px; 
+  text-align: center;
+}
 
-  #cookies {
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1;
-    display: none;
-  }
+/* Form Styling */
+form {
+  max-width: 400px;
+  margin: auto;
+  background: #fff; /* White background */
+  padding: 50px 50px 50px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
-  .cookies {
-    min-height: 70px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+label {
+  display: block;
+  margin-bottom: 8px;
+  color: #4e342e; /* Brown */
+}
 
-  .cookies a {
-    color: yellow;
-    font-weight: 500;
-    text-decoration: none;
-  }
+input[type="text"],
+input[type="password"] {
+  width: calc(100% - 22px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
 
-  #cookies-btn {
-    border-radius: 5px;
-    padding: 6px 8px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border: 2px solid white;
-    background-color: black;
-    color: white;
-  }
+#login-btn,
+#reg-btn,
+#cookies-btn {
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #689f38; /* Light green */
+  color: #fff;
+  transition: background-color 0.3s ease;
+}
 
-  /* @media (max-height: 475px) {
-    #cookies {
-      display: none;
-    }
-  } */
+#login-btn:hover,
+#reg-btn:hover,
+#cookies-btn:hover {
+  background-color: #558b2f; /* Darker shade of green on hover */
+}
 
-  @media (max-width: 1600px) {
-    .container {
-      width: 100%;
-    }
-  }
+/* Cookies Styling */
+#cookies {
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1;
+}
 
-  @media (max-width: 1024px) {
-    .cookies {
-      padding: 10px 0;
-    }
-  }
+.cookies {
+  min-height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px;
+}
+
+.cookies a {
+  color: #ff0;
+  font-weight: bold;
+  text-decoration: none;
+}
 </style>
