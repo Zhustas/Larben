@@ -1,5 +1,7 @@
 "use strict";
 
+import { MarkerClusterer } from "@googlemaps/markerclusterer";
+
 export default class Map {
   #MAPS_API_KEY;
   #GEOCODING_API_KEY;
@@ -9,6 +11,9 @@ export default class Map {
     center: { lat: 55.1694, lng: 23.8813 },
     mapId: "MAP_ID",
   };
+  #currentLatLng;
+  #marker;
+  #clickedOnMarker;
 
   constructor(MAPS_API_KEY, GEOCODING_API_KEY) {
     this.#MAPS_API_KEY = MAPS_API_KEY;
@@ -56,6 +61,10 @@ export default class Map {
     });
   }
 
+  getCurrentLatLng() {
+    return this.#currentLatLng;
+  }
+
   async initMap() {
     const { Map } = await google.maps.importLibrary("maps");
 
@@ -63,18 +72,101 @@ export default class Map {
 
     this.#map.addListener("click", async (mapsMouseEvent) => {
       let latLng = mapsMouseEvent.latLng.toJSON();
-      if (await this.isPointInLithuania(latLng)) {
+
+      this.#currentLatLng = latLng;
+      let isPointValid = await this.isPointInLithuania(this.#currentLatLng);
+
+      if (isPointValid) {
+        if (this.#marker) {
+          this.removeMarker();
+        }
         this.addMarker(latLng);
       }
     });
   }
 
-  async addMarker(latLng) {
-    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+  removeMarker() {
+    this.#marker?.setMap(null);
+    this.#marker = undefined;
+  }
 
-    const marker = new AdvancedMarkerElement({
+  async addMarker(latLng) {
+    const { AdvancedMarkerElement, PinElement, InfoWindow } =
+      await google.maps.importLibrary("marker");
+
+    const pinBackground = new PinElement({
+      background: "#3232FF",
+      glyphColor: "#B2B2FF",
+      borderColor: "#00007F",
+    });
+
+    this.#marker = new AdvancedMarkerElement({
       map: this.#map,
       position: latLng,
+      content: pinBackground.element,
+      gmpClickable: true,
+    });
+
+    this.#marker.addListener("click", () => {
+      this.#clickedOnMarker = true;
+    });
+  }
+
+  setClicedkOnMarker(value) {
+    this.#clickedOnMarker = value;
+  }
+
+  clickedOnMarker() {
+    return this.#clickedOnMarker;
+  }
+
+  async loadMarkers(markers, id, users) {
+    const { AdvancedMarkerElement, PinElement } =
+      await google.maps.importLibrary("marker");
+
+    const currentID = id;
+
+    const currentMarker = new PinElement({
+      background: "#3232FF",
+      glyphColor: "#B2B2FF",
+      borderColor: "#00007F",
+    });
+
+    markers = markers.map((value) => {
+      const position = {
+        lat: value["LATITUDE"],
+        lng: value["LONGITUDE"],
+      };
+
+      let username;
+      for (let user of users) {
+        if (user["ID"] === value["USER_ID"]) {
+          username = user["USERNAME"];
+          break;
+        }
+      }
+      const infoWindow = new google.maps.InfoWindow({
+        content: `
+        <strong>Vartotojas: ${username}</strong>
+        <div></div>
+        <strong>Aprašymas: ${value["DESCRIPTION"]}</strong>`,
+      });
+
+      let marker = new AdvancedMarkerElement({ position });
+
+      marker.addListener("click", () => {
+        infoWindow.open({
+          anchor: marker,
+          map: this.#map,
+        });
+      });
+
+      return marker;
+    });
+
+    new MarkerClusterer({
+      map: this.#map,
+      markers: markers,
     });
   }
 
@@ -101,51 +193,3 @@ export default class Map {
     return false;
   }
 }
-
-// let map;
-
-// async function initMap() {
-//   let options = {
-//     zoom: 4,
-//     center: { lat: -25.344, lng: 131.031 },
-//     mapId: "MAP_ID",
-//   };
-
-//   const { Map } = await google.maps.importLibrary("maps");
-//   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-
-//   map = new Map(document.getElementById("map"), options);
-
-//   const marker = new AdvancedMarkerElement({
-//     map: map,
-//     position: options.center,
-//   });
-// }
-
-// async function initMap() {
-// Request needed libraries.
-//   const { Map } = await google.maps.importLibrary("maps");
-//   const myLatlng = { lat: -25.363, lng: 131.044 };
-//   const map = new google.maps.Map(document.getElementById("map"), {
-//     zoom: 4,
-//     center: myLatlng,
-//   });
-// Create the initial InfoWindow.
-// let infoWindow = new google.maps.InfoWindow({
-//   content: "Click the map to get Lat/Lng!",
-//   position: myLatlng,
-// });
-
-// infoWindow.open(map);
-// map.addListener("click", (mapsMouseEvent) => {
-// infoWindow.close();
-// infoWindow = new google.maps.InfoWindow({
-//   position: mapsMouseEvent.latLng,
-// });
-// infoWindow.setContent(
-//   JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2)
-// );
-// infoWindow.open(map);
-//     console.log(mapsMouseEvent.latLng.toJSON());
-//   });
-// }

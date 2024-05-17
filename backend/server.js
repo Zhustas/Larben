@@ -1,279 +1,328 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3");
-const crypto = require("crypto-js");
-const dotenv = require("dotenv").config();
+const https = require("https");
+const fs = require("fs");
 var cookieParser = require("cookie-parser");
 
-class Database {
-  #filename;
-  #database;
-
-  constructor(filename) {
-    this.#filename = filename;
-  }
-
-  open() {
-    this.#database = new sqlite3.Database(this.#filename, (err) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      console.log("Database opened");
-    });
-  }
-
-  // ******************************************* GET METHODS ********************************
-
-  getUsers(res) {
-    this.#database?.all("SELECT * FROM Users", (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: "Internal server error" });
-      }
-
-      rows = [
-        {
-          identification: crypto.lib.WordArray.random(32).toString(),
-        },
-        ...rows,
-      ];
-      res.json(rows);
-    });
-  }
-
-  getPosts(res) {
-    this.#database?.all("SELECT * FROM Posts", (err, rows) => {
-      if (err) {
-        res.status(500).json({ error: "Internal server error" });
-      }
-
-      if (rows) {
-        rows = [
-          {
-            identification: crypto.lib.WordArray.random(32).toString(),
-          },
-          ...rows,
-        ];
-        res.json(rows);
-      }
-    });
-  }
-
-  checkSessionTokenForExpiration(req, res) {
-    // Get sessionToken cookie
-    const { sessionToken } = req.cookies;
-
-    // SQL for checking Session Token expiration
-    const sql = `
-      SELECT * FROM SessionTokens WHERE TOKEN = ?;
-    `;
-
-    // Get row
-    this.#database.get(sql, [sessionToken], (err, row) => {
-      if (err) {
-        return console.error(err.message);
-      }
-
-      if (row) {
-        const { TOKEN_CREATED } = row;
-
-        if (TOKEN_CREATED + 1 * 60 * 1000 < new Date()) {
-          res.send("Expired");
-        } else {
-          res.send("Ok");
-        }
-      } else {
-        res.send("Don't exist");
-      }
-    });
-  }
-
-  // ****************************************************************************************
-  // ******************************************* POST METHODS *******************************
-
-  insertSessionToken(USER_ID) {
-    // SQL for inserting Session Token
-    const sql = `
-      INSERT INTO SessionTokens(USER_ID, TOKEN, TOKEN_CREATED)
-      VALUES (?, ?, ?);
-    `;
-
-    // Session Token values
-    const values = [
-      USER_ID,
-      crypto.lib.WordArray.random(32).toString(),
-      new Date(),
-    ];
-
-    // Insert Session Token
-    this.#database?.run(sql, values, (err) => {
-      if (err) {
-        return console.error(err);
-      }
-
-      console.log("Session Token added");
-    });
-
-    return values[1];
-  }
-
-  checkCredentials(req, res) {
-    // Get username and password
-    const { USERNAME: username, PASSWORD: password } = req.body;
-
-    // SQL for finding user
-    const sql = `SELECT * FROM Users WHERE USERNAME = ? AND PASSWORD = ?`;
-
-    // Find first row where username and password matches
-    this.#database.get(sql, [username, password], (err, row) => {
-      if (err) {
-        return console.error(err.message);
-      }
-
-      if (row) {
-        const token = this.insertSessionToken(row["ID"]);
-
-        const plus3Hours = 3 * 60 * 60 * 1000;
-        const expirationTime = 10 * 60 * 1000;
-
-        res
-          .cookie("sessionToken", token, {
-            maxAge: plus3Hours + expirationTime,
-            path: "/",
-            secure: false,
-            domain: "localhost",
-          })
-          .send("ok");
-      } else {
-        res.status(401).send("Unauthorized");
-      }
-    });
-  }
-
-  insertUser(req, res) {
-    // Get user object from json
-    const user = req.body;
-
-    // Create SQL text
-    const sql = `
-      INSERT INTO Users (NAME, LAST_NAME, BIRTH_DATE, USERNAME, EMAIL, PASSWORD, GUILD_ID)
-      VALUES (?, ?, ?, ?, ?, ?, ?);
-    `;
-
-    // Get only values from user object
-    const values = Object.values(user).map((value) => value);
-
-    // Insert user
-    this.#database?.run(sql, values, (err) => {
-      if (err?.errno === 19) {
-        res.status(409).send(err.message);
-        return;
-      }
-
-      res.send("Ok");
-      console.log("User added");
-    });
-  }
-
-  insertPost(req, res) {
-    // Get post object from json
-    const post = req.body;
-
-    // Create SQL text
-    const sql = `
-      INSERT INTO Posts (USER_ID, TEXT, POST_DATETIME, LIKES)
-      VALUES (?, ?, ?, ?);
-    `;
-
-    // Get only values from post object
-    const values = Object.values(post).map((value) => value);
-
-    // Insert post
-    this.#database.run(sql, values, (err) => {
-      if (err) {
-        return console.error(err.message);
-      }
-
-      res.send("Ok");
-      console.log("Post added");
-    });
-  }
-
-  // ****************************************************************************************
-
-  close() {
-    this.#database?.close((err) => {
-      if (err) {
-        return console.error(err.message);
-      }
-      console.log("Database closed");
-    });
-  }
-}
+const { checkSessionTokenExists, validRequestBody } = require("./functions.js");
+const {
+  getUserBySessionToken,
+  getUsers,
+  getPosts,
+  getMarkers,
+  checkSessionTokenForExpiration,
+} = require("./GET.js");
+const {
+  insertUser,
+  checkCredentials,
+  insertPost,
+  insertMarker,
+} = require("./POST.js");
+const { updateUser, updatePost } = require("./PUT.js");
+const { deleteUser, deleteSessionToken, deletePost } = require("./DELETE.js");
 
 const app = express();
-const port = 3000;
 const jsonParser = bodyParser.json();
-const AES_KEY = process.env.AES_KEY;
 
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
-  // res.setHeader("Access-Control-Allow-Methods", "POST");
+  res.setHeader("Access-Control-Allow-Origin", "https://localhost:8080");
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
+  res.setHeader("Access-Control-Allow-Methods", "PUT, DELETE");
   res.setHeader("Access-Control-Allow-Credentials", "true");
   next();
 });
 
-// ******************************************* GET METHODS *******************************
+// Get methods
+app.get("/user", (req, res) => {
+  const sessionToken = req.cookies["sessionToken"];
 
-app.get("/users", jsonParser, (req, res) => {
-  database.getUsers(res);
+  function callback(tokenExists) {
+    if (tokenExists) {
+      getUserBySessionToken(database, res, sessionToken);
+    } else {
+      res.send("Error");
+    }
+  }
+  checkSessionTokenExists(database, sessionToken, callback);
 });
 
-app.get("/posts", jsonParser, (req, res) => {
-  database.getPosts(res);
+app.get("/users", (req, res) => {
+  const sessionToken = req.cookies["sessionToken"];
+
+  function callback(tokenExists) {
+    if (tokenExists) {
+      getUsers(database, res);
+    } else {
+      res.send("Error");
+    }
+  }
+  checkSessionTokenExists(database, sessionToken, callback);
+});
+
+app.get("/posts", (req, res) => {
+  function callback(tokenExists) {
+    if (tokenExists) {
+      getPosts(database, res);
+    } else {
+      res.send("Error");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
+});
+
+app.get("/markers", (req, res) => {
+  function callback(tokenExists) {
+    if (tokenExists) {
+      getMarkers(database, res);
+    } else {
+      res.send("Error");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
 });
 
 app.get("/checkSessionToken", (req, res) => {
-  database.checkSessionTokenForExpiration(req, res);
+  function callback(tokenExists) {
+    if (tokenExists) {
+      checkSessionTokenForExpiration(database, req, res, sessionToken);
+    } else {
+      res.send("Error");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
 });
 
-// ******************************************************************************************
-// ******************************************* POST METHODS *********************************
+// Post methods
+app.post("/user", jsonParser, (req, res) => {
+  const expectations = {
+    NAME: "string",
+    LAST_NAME: "string",
+    BIRTH_DATE: "date",
+    USERNAME: "string",
+    EMAIL: "string",
+    PASSWORD: "string",
+    DESCRIPTION: "string",
+  };
 
-app.post("/register", jsonParser, (req, res) => {
-  database.insertUser(req, res);
+  if (!validRequestBody(req.body, expectations)) {
+    res.send("Error in request body");
+    return;
+  }
+
+  insertUser(database, req, res);
 });
 
 app.post("/checkCredentials", jsonParser, (req, res) => {
-  database.checkCredentials(req, res);
+  const expectations = {
+    USERNAME: "string",
+    PASSWORD: "string",
+  };
+
+  if (!validRequestBody(req.body, expectations)) {
+    res.send("Error in request body");
+    return;
+  }
+
+  const expirationTime = 1 * 60 * 1000; // 10 minutes
+
+  checkCredentials(database, req, res, expirationTime);
 });
 
-app.post("/insertPost", jsonParser, (req, res) => {
-  database.insertPost(req, res);
+app.post("/post", jsonParser, (req, res) => {
+  const expectations = {
+    USER_ID: "int",
+    TEXT: "string",
+    POST_DATETIME: "datetime",
+    LIKES: "int",
+  };
+
+  if (!validRequestBody(req.body, expectations)) {
+    res.send("Error in request body");
+    return;
+  }
+
+  function callback(tokenExists) {
+    if (tokenExists) {
+      insertPost(database, req, res);
+    } else {
+      res.send("Ok");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
 });
 
-// ******************************************************************************************
+app.post("/marker", jsonParser, (req, res) => {
+  const expectations = {
+    USER_ID: "int",
+    DESCRIPTION: "string",
+    LATITUDE: "double",
+    LONGITUDE: "double",
+  };
+
+  console.log("asss");
+
+  if (!validRequestBody(req.body, expectations)) {
+    res.send("Error in request body");
+    return;
+  }
+
+  console.log("as");
+
+  function callback(tokenExists) {
+    if (tokenExists) {
+      insertMarker(database, req, res);
+    } else {
+      res.send("Error");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
+});
+
+// Delete methods
+app.delete("/user/:id", (req, res) => {
+  function callback(tokenExists) {
+    if (tokenExists) {
+      deleteUser(database, res, req.params["id"]);
+    } else {
+      res.send("Error");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
+});
+
+app.delete("/sessionToken", (req, res) => {
+  function callback(tokenExists) {
+    if (tokenExists) {
+      deleteSessionToken(database, res, sessionToken);
+    } else {
+      res.send("Error");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
+});
+
+app.delete("/post/:id", (req, res) => {
+  function callback(tokenExists) {
+    if (tokenExists) {
+      deletePost(database, res, req.params["id"]);
+    } else {
+      res.send("Error");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
+});
+
+// Put methods
+app.put("/user/:id", jsonParser, (req, res) => {
+  const expectations = {
+    NAME: "string",
+    LAST_NAME: "string",
+    BIRTH_DATE: "date",
+    DESCRIPTION: "string",
+  };
+
+  if (!validRequestBody(req.body, expectations)) {
+    res.send("Error in request body");
+    return;
+  }
+
+  function callback(tokenExists) {
+    if (tokenExists) {
+      updateUser(database, req, res, req.params["id"]);
+    } else {
+      res.send("Error");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
+});
+
+app.put("/post/:id", jsonParser, (req, res) => {
+  const expectations = {
+    LIKES: "int",
+  };
+
+  if (!validRequestBody(req.body, expectations)) {
+    res.send("Error in request body");
+    return;
+  }
+
+  function callback(tokenExists) {
+    if (tokenExists) {
+      updatePost(database, req, res, req.params["id"]);
+    } else {
+      res.send("Error");
+    }
+  }
+
+  const sessionToken = req.cookies["sessionToken"];
+  checkSessionTokenExists(database, sessionToken, callback);
+});
 
 function gracefulShutdown() {
-  database.close();
+  database.close((err) => {
+    if (err) {
+      return console.error(err.message);
+    }
+    console.log("Database closed");
+  });
 
-  console.log("Closing server");
-  server.close();
+  server.close((err) => {
+    if (err) {
+      return console.error(err.message);
+    }
+  });
+  console.log("Server closed");
 
   process.exit(0);
 }
 
-const database = new Database("database/larben.db");
-database.open();
+const port = 3000;
+const database = new sqlite3.Database("database/larben.db", (err) => {
+  if (err) {
+    return console.error(err.message);
+  }
+  console.log("Database opened");
+});
 
-const server = app.listen(port, () => {
+const privateKey = fs.readFileSync("key.pem");
+const certificate = fs.readFileSync("certificate.pem");
+
+const server = https.createServer(
+  { key: privateKey, cert: certificate, passphrase: "MonAmour" },
+  app
+);
+
+server.listen(port, () => {
   console.log(`Larben is listening on port ${port}`);
 });
 
 process.on("SIGINT", gracefulShutdown);
 process.on("SIGTERM", gracefulShutdown);
+
+// openssl genrsa -aes256 -out key.pem 4096
+// openssl req -new -sha256 -subj "/CN=localhost" -key key.pem -out request.csr
+// openssl x509 -req -sha256 -days 90 -in request.csr -signkey key.pem -out certificate.pem

@@ -6,6 +6,7 @@ CREATE TABLE Users (
     USERNAME     TEXT    NOT NULL UNIQUE,
     EMAIL        TEXT    NOT NULL UNIQUE,
     PASSWORD     TEXT    NOT NULL,
+    DESCRIPTION  TEXT,
     GUILD_ID     INTEGER
 );
 
@@ -17,19 +18,26 @@ CREATE TABLE SessionTokens (
     FOREIGN KEY (USER_ID) REFERENCES Users(ID) ON DELETE CASCADE
 );
 
+-- Kol kas "Posts" tegu turi galimybę tik įrašyti tekstą (o ne pridėti paveikslėlio pvz)
 CREATE TABLE Posts (
     ID            INTEGER  PRIMARY KEY AUTOINCREMENT,
-    -- Kol kas "Posts" tegu turi galimybę tik įrašyti tekstą (o ne pridėti paveikslėlio pvz)
     USER_ID       INTEGER  NOT NULL,
     TEXT          TEXT     NOT NULL,
     POST_DATETIME DATETIME NOT NULL,
-    LIKES         INTEGER  NOT NULL
-    -- Vėliau pridėti
-    -- FOREIGN KEY (USER_ID) REFERENCES Users(ID) ON DELETE CASCADE
+    LIKES         INTEGER  NOT NULL,
+    FOREIGN KEY (USER_ID) REFERENCES Users(ID) ON DELETE CASCADE
+);
+
+CREATE TABLE Markers (
+    ID          INTEGER PRIMARY KEY AUTOINCREMENT,
+    USER_ID     INTEGER NOT NULL,
+    DESCRIPTION TEXT    NOT NULL,
+    LATITUDE    REAL    NOT NULL,
+    LONGITUDE   REAL    NOT NULL,
+    FOREIGN KEY (USER_ID) REFERENCES Users(ID) ON DELETE CASCADE
 );
 
 DROP TABLE Users;
--- DROP TABLE SessionTokens;
+DROP TABLE SessionTokens;
 DROP TABLE Posts;
-
-DELETE FROM SessionTokens WHERE 1 = 1;
+DROP TABLE Markers;

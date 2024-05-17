@@ -1,26 +1,41 @@
 <script>
   // The town crier (šauklys) used to make public announcements in the streets.
-
-  import { onMount } from "svelte";
-
-  let posts = [
-    // {
-    //   a: "Justas",
-    //   b: "2024-05-14 15:13",
-    //   c: "Labas",
-    //   d: 12,
-    // },
-  ];
+  let posts = [];
 
   let text = "";
   let author = "Justas";
   let likes = 124515;
 
-  function handleClick() {
-    if (!text) {
-      console.log("No text!");
-      return;
-    }
+  let user = {};
+  let users = [];
+
+  getUser();
+  getAllUsers();
+  getPosts();
+
+  function getUser() {
+    const hr = new XMLHttpRequest();
+    hr.open("GET", "https://localhost:3000/user");
+    hr.withCredentials = true;
+    hr.send();
+    hr.onload = () => {
+      user = JSON.parse(hr.response);
+    };
+  }
+
+  function getAllUsers() {
+    const hr = new XMLHttpRequest();
+    hr.open("GET", "https://localhost:3000/users");
+    hr.withCredentials = true;
+    hr.send();
+    hr.onload = () => {
+      users = JSON.parse(hr.response);
+    };
+  }
+
+  // *************************************** GETTING POSTS ************************************
+  function addToPosts(response) {
+    const res = JSON.parse(response);
 
     let datetime = new Date().toLocaleString("lt-LT", {
       year: "numeric",
@@ -30,26 +45,32 @@
       minute: "numeric",
     });
 
-    posts = [...posts, { a: author, b: datetime, c: text, d: likes }];
-  }
-
-  onMount(getPosts);
-
-  // *************************************** GETTING POSTS ************************************
-  function addToPosts(response) {
-    const res = JSON.parse(response);
-
     for (let post of res) {
       if (post["ID"]) {
-        post["USER_ID"] = "Justas";
-        posts = [...posts, post];
+        for (let usr of users) {
+          if (usr["ID"] == post["USER_ID"]) {
+            post["USERNAME"] = usr["USERNAME"];
+          }
+        }
+        post["POST_DATETIME"] = new Date(post["POST_DATETIME"]).toLocaleString(
+          "lt-LT",
+          {
+            year: "numeric",
+            month: "numeric",
+            day: "numeric",
+            hour: "numeric",
+            minute: "numeric",
+          }
+        );
+        posts = [post, ...posts];
       }
     }
   }
 
   function getPosts() {
     const hr = new XMLHttpRequest();
-    hr.open("GET", "http://localhost:3000/posts");
+    hr.open("GET", "https://localhost:3000/posts");
+    hr.withCredentials = true;
     hr.send();
     hr.onload = () => {
       addToPosts(hr.response);
@@ -62,20 +83,12 @@
       return;
     }
 
-    let datetime = new Date().toLocaleString("lt-LT", {
-      year: "numeric",
-      month: "numeric",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-    });
-
     // Convert information into object
     const post = {
-      USER_ID: 1,
+      USER_ID: user["ID"],
       TEXT: text,
-      POST_DATETIME: datetime,
-      LIKES: 15,
+      POST_DATETIME: new Date().getTime(),
+      LIKES: 0,
     };
 
     // Convert to json
@@ -87,52 +100,140 @@
 
   function postPost(postString) {
     const hr = new XMLHttpRequest();
-    hr.open("POST", "http://localhost:3000/insertPost");
+    hr.open("POST", "https://localhost:3000/post");
     hr.setRequestHeader("Content-Type", "application/json");
+    hr.withCredentials = true;
     hr.send(postString);
     hr.onload = () => {
       console.log(hr.response);
     };
+
+    text = "";
+  }
+
+  function handleClick(index) {
+    if (posts[index]["LIKED"]) {
+      posts[index]["LIKED"] = false;
+      posts[index]["LIKES"]--;
+    } else {
+      posts[index]["LIKED"] = true;
+      posts[index]["LIKES"]++;
+    }
   }
 </script>
 
-<p>Welcome to <strong>Crier</strong>!</p>
-
-<textarea bind:value={text} />
-<button on:click={handleClick}>Click me</button>
-<button on:click={post}>Post post</button>
-
-<div class="posts">
-  {#each posts as { USER_ID, POST_DATETIME, TEXT, LIKES }}
-    <div class="post">
-      <div class="container">
-        <p class="author">{USER_ID}</p>
-        <p class="datetime">{POST_DATETIME}</p>
-        <p class="text">{TEXT}</p>
-      </div>
-      <button class="likes">{LIKES}</button>
+<div class="main-container">
+  <div class="top">
+    <h2>Naujienos</h2>
+  </div>
+  <div class="area">
+    <div class="left-side"></div>
+    <div class="posts">
+      {#each posts as { USER_ID, POST_DATETIME, TEXT, LIKES, USERNAME }, index}
+        <div class="post">
+          <div class="post-main-container">
+            <p class="author">{USERNAME}</p>
+            <!-- {#if USER_ID === 1}
+              <button class="delete-post-btn">x</button>
+            {/if} -->
+            <p class="datetime">{POST_DATETIME}</p>
+            <p class="text">{TEXT}</p>
+          </div>
+          <!-- <button on:click={() => handleClick(index)} class="likes"
+            >{LIKES}</button
+          > -->
+        </div>
+      {/each}
     </div>
-  {/each}
+    <div class="right-side">
+      <p>Tavo naujas pranešimas</p>
+      <textarea bind:value={text}></textarea>
+      <button on:click={post} class="add-post-btn">Pridėti pranešimą</button>
+      <!-- <button on:click={getPosts}>Click me to get posts</button> -->
+      <!-- <button on:click={post}>Click me to add a post</button> -->
+    </div>
+  </div>
 </div>
 
 <style>
+  .main-container {
+    width: 1200px;
+    height: 100%;
+
+    border-top: 2px solid black;
+    border-bottom: 2px solid black;
+    border-right: 2px solid black;
+
+    display: flex;
+    flex-direction: column;
+  }
+
+  .top {
+    width: 100%;
+    height: 10%;
+
+    /* text-align: center; */
+
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
+  }
+
+  h2 {
+    margin-top: 10px;
+  }
+
+  .area {
+    height: 90%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .left-side {
+    width: 10%;
+    height: 100%;
+  }
+
+  .posts {
+    width: 50%;
+    height: 100%;
+    overflow: scroll;
+    overflow-x: hidden;
+  }
+
+  .post {
+    border-bottom: 1px solid rgb(197, 197, 197);
+  }
+
+  .right-side {
+    width: 40%;
+    height: 100%;
+  }
+
   .post {
     position: relative;
     padding: 0;
     margin: 0;
     width: 500px;
-    /* background-color: blue; */
+    background-color: blue;
     margin: 40px 30px; /* Jei pakeisti "post" dydį */
-    /* border: 1px solid black; */
+    border: 1px solid black;
   }
 
   .post p {
     margin: inherit;
+    font-size: 18px;
   }
 
-  .container {
+  .post-main-container {
     width: 500px;
-    background-color: orange;
+    background-color: rgb(224, 224, 224);
+    word-wrap: break-word;
+  }
+
+  .post-main-container:hover {
+    background-color: rgb(241, 241, 241);
   }
 
   .author,
@@ -146,11 +247,16 @@
 
   .datetime {
     float: right;
-    padding: 5px 5px 0 0;
+    padding: 5px 10px 0 0;
+  }
+
+  .delete-post-btn {
+    float: right;
+    margin: 5px 5px 0 0;
   }
 
   .text {
-    padding: 10px 0 30px 15px;
+    padding: 10px 15px 30px 15px;
   }
 
   .likes {
@@ -163,5 +269,52 @@
     height: 40px;
     bottom: -20px;
     right: -20px;
+    color: white;
+    background-color: rgb(255, 80, 80);
+    font-size: 15px;
+  }
+
+  .likes:hover {
+    background-color: rgb(255, 19, 19);
+  }
+
+  .likes:active {
+    background-color: rgb(255, 109, 109);
+  }
+
+  .right-side p {
+    font-size: 18px;
+    margin-left: 10px;
+    margin-bottom: 5px;
+  }
+
+  textarea {
+    margin-left: 10px;
+    width: 90%;
+    min-height: 20%;
+    max-height: 50%;
+    resize: vertical;
+    display: block;
+    font-size: 18px;
+  }
+
+  .add-post-btn {
+    margin-top: 10px;
+    margin-right: 40px;
+    float: right;
+    background-color: rgb(56, 196, 91);
+    height: 40px;
+    width: 150px;
+    color: white;
+
+    cursor: pointer;
+  }
+
+  .add-post-btn:hover {
+    background-color: rgb(36, 155, 66);
+  }
+
+  .add-post-btn:active {
+    background-color: rgb(85, 231, 122);
   }
 </style>

@@ -1,4 +1,32 @@
 <script>
+  import { checkSessionToken } from "./../HTTPfunctions.js";
+  import Cookies from "js-cookie";
+
+  if (Cookies.get("sessionToken")) {
+    const hr = new XMLHttpRequest();
+    hr.open("GET", "https://localhost:3000/checkSessionToken");
+    hr.withCredentials = true;
+    hr.send();
+
+    hr.onload = () => {
+      const response = hr.response;
+
+      console.log(response);
+
+      if (response !== "Session token valid") {
+        const hr2 = new XMLHttpRequest();
+        hr2.open("DELETE", "https://localhost:3000/sessionToken");
+        hr2.withCredentials = true;
+        hr2.send();
+        hr2.onload = () => {
+          Cookies.remove("sessionToken");
+        };
+      } else {
+        window.location = "/main";
+      }
+    };
+  }
+
   let username = "";
   let password = "";
 
@@ -18,18 +46,13 @@
 
   function doPOST(userString) {
     const hr = new XMLHttpRequest();
-    hr.open("POST", "http://localhost:3000/checkCredentials");
+    hr.open("POST", "https://localhost:3000/checkCredentials");
     hr.setRequestHeader("Content-Type", "application/json");
     hr.withCredentials = true;
     hr.send(userString);
     hr.onload = () => {
-      if (hr.status === 200) {
-        console.log(hr.response);
-        console.log(hr.responseText);
-        console.log(hr.responseURL);
-        console.log(hr.responseXML);
-        console.log(hr.getAllResponseHeaders());
-        // window.location = "/main";
+      if (hr.response === "User authorized") {
+        window.location = "/main";
       }
     };
   }
@@ -80,9 +103,8 @@
 
 <svelte:window on:load={cookieMessage} />
 
-<h1>Larben</h1>
-<p>Sveiki atvykę į Lietuvos Archeologijos Bendruomenę!</p>
-<p>Įveskite vartojo vardą ir slaptažodį, kad prisijungtumėte.</p>
+<h1 class="title">Larben</h1>
+<p class="welcome">Sveiki atvykę į Lietuvos Archeologijos Bendruomenę!</p>
 
 <form autocomplete="on">
   <label for="username">Vartotojo vardas</label>
@@ -94,7 +116,7 @@
   <button on:click|preventDefault={login} id="login-btn">Prisijungti</button>
 </form>
 
-<hr />
+<!-- <hr /> -->
 <div class="bot-region">
   <p>Neturi paskyros? Spausk registracijos mygtuką.</p>
   <button on:click={register} id="reg-btn">Registruotis</button>
@@ -116,36 +138,90 @@
 </div>
 
 <style>
+  /* General Styling */
   label {
-    display: block;
-    margin-bottom: 5px;
-  }
-
-  #password-lbl {
-    margin-top: 7px;
-  }
-
-  #login-btn {
-    display: block;
-    margin: 1rem 0;
-  }
-
-  /* ******************************** Cookies ************************** */
-  #cookies {
+    font-family: Arial, sans-serif;
+    margin: 5px;
     padding: 0;
-    margin: 0;
+    /*background-color: #f5f5f5; /* Light gray background */
   }
 
   .container {
-    width: 1600px;
+    max-width: 1200px;
     margin: auto;
+    padding: 0 20px;
   }
 
   .subcontainer {
-    width: 85%;
+    width: 100%;
     margin: auto;
   }
 
+  /* Header Styling */
+  .title {
+    font-size: 2rem;
+    text-align: center;
+    margin-top: 150px;
+    color: #4e342e; /* Brown */
+  }
+
+  .welcome {
+    font-size: 1.2rem;
+    text-align: center;
+    margin-top: 10px;
+    color: #4e342e; /* Brown */
+  }
+
+  .bot-region {
+    margin-left: 20px;
+    text-align: center;
+  }
+
+  /* Form Styling */
+  form {
+    max-width: 400px;
+    margin: auto;
+    background: #fff; /* White background */
+    padding: 50px 50px 50px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  label {
+    display: block;
+    margin-bottom: 8px;
+    color: #4e342e; /* Brown */
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+
+  #login-btn,
+  #reg-btn,
+  #cookies-btn {
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #689f38; /* Light green */
+    color: #fff;
+    transition: background-color 0.3s ease;
+  }
+
+  #login-btn:hover,
+  #reg-btn:hover,
+  #cookies-btn:hover {
+    background-color: #558b2f; /* Darker shade of green on hover */
+  }
+
+  /* Cookies Styling */
   #cookies {
     width: 100%;
     position: fixed;
@@ -163,39 +239,12 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
+    padding: 10px;
   }
 
   .cookies a {
-    color: yellow;
-    font-weight: 500;
+    color: #ff0;
+    font-weight: bold;
     text-decoration: none;
-  }
-
-  #cookies-btn {
-    border-radius: 5px;
-    padding: 6px 8px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    border: 2px solid white;
-    background-color: black;
-    color: white;
-  }
-
-  /* @media (max-height: 475px) {
-    #cookies {
-      display: none;
-    }
-  } */
-
-  @media (max-width: 1600px) {
-    .container {
-      width: 100%;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    .cookies {
-      padding: 10px 0;
-    }
   }
 </style>
