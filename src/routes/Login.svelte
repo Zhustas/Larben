@@ -1,5 +1,4 @@
 <script>
-  import { checkSessionToken } from "./../HTTPfunctions.js";
   import Cookies from "js-cookie";
 
   if (Cookies.get("sessionToken")) {

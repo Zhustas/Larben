@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "rollup -c -w --bundleConfigAsCjs",
-    "start": "sirv public --http2 --key key.pem --cert certificate.pem --pass MonAmour"
+    "start": "sirv public"
   },
   "keywords": [],
   "author": "",

@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const sqlite3 = require("sqlite3");
 const https = require("https");
 const fs = require("fs");
+require("dotenv").config();
 var cookieParser = require("cookie-parser");
 
 const { checkSessionTokenExists, validRequestBody } = require("./functions.js");
@@ -308,11 +309,15 @@ const database = new sqlite3.Database("database/larben.db", (err) => {
   console.log("Database opened");
 });
 
-const privateKey = fs.readFileSync("key.pem");
-const certificate = fs.readFileSync("certificate.pem");
+const privateKey = fs.readFileSync("certificate/key.pem");
+const certificate = fs.readFileSync("certificate/certificate.pem");
 
 const server = https.createServer(
-  { key: privateKey, cert: certificate, passphrase: "MonAmour" },
+  {
+    key: privateKey,
+    cert: certificate,
+    passphrase: process.env.CERTIFICATE_PASSPHRASE,
+  },
   app
 );
 
@@ -322,7 +327,3 @@ server.listen(port, () => {
 
 process.on("SIGINT", gracefulShutdown);
 process.on("SIGTERM", gracefulShutdown);
-
-// openssl genrsa -aes256 -out key.pem 4096
-// openssl req -new -sha256 -subj "/CN=localhost" -key key.pem -out request.csr
-// openssl x509 -req -sha256 -days 90 -in request.csr -signkey key.pem -out certificate.pem

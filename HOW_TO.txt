@@ -1,3 +1,0 @@
-https://typeofnan.dev/how-to-set-up-a-svelte-app-with-rollup/
-
-    "start": "sirv public --http2 --key certificate/key.pem --cert certificate/certificate.pem --pass MonAmour"

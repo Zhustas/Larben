@@ -1,6 +1,8 @@
 # Larben
 
-Lietuvos Archeologijos Bendruomenė - Larben.
+Lietuvos Archeologijos Bendruomenė - Larben.  
+**Rollup Config** padarytas su https://typeofnan.dev/how-to-set-up-a-svelte-app-with-rollup/ pagalba. Ačiū.  
+Frontend paleidžiamas be **HTTPS**, o backend su **HTTPS** (Frontend irgi galima paleisti su **HTTPS**).
 
 Node.js
 
@@ -14,10 +16,16 @@ Prieš paleidžiant patį pirmą kartą
 npm install
 ```
 
-Norint paleisti programą
+Norint paleisti frontend
 
 ```
 npm run dev
+```
+
+Norint paleisti backend
+
+```
+node backend/server.js
 ```
 
 ## VSCode Extensions (neprivaloma)
@@ -36,4 +44,10 @@ Prettier
 
 ```
 Prettier - Code formatter
+```
+
+SQLite
+
+```
+SQLite
 ```

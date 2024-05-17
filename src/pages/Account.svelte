@@ -1,6 +1,5 @@
 <script>
   import Cookies from "js-cookie";
-  import { deleteSessionToken } from "./../HTTPfunctions.js";
 
   let name, lastName, birthDate, username, email, password, description;
   let user = {};

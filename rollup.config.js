@@ -60,6 +60,9 @@ export default {
       "process.env.GEOCODING_API_KEY": JSON.stringify(
         process.env.GEOCODING_API_KEY
       ),
+      "process.env.CERTIFICATE_PASSPHRASE": JSON.stringify(
+        process.env.CERTIFICATE_PASSPHRASE
+      ),
     }),
   ],
 };

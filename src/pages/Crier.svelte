@@ -250,16 +250,16 @@
     padding: 5px 10px 0 0;
   }
 
-  .delete-post-btn {
+  /* .delete-post-btn {
     float: right;
     margin: 5px 5px 0 0;
-  }
+  } */
 
   .text {
     padding: 10px 15px 30px 15px;
   }
 
-  .likes {
+  /* .likes {
     text-wrap: wrap;
     border: 2px solid black;
     position: absolute;
@@ -272,15 +272,15 @@
     color: white;
     background-color: rgb(255, 80, 80);
     font-size: 15px;
-  }
+  } */
 
-  .likes:hover {
+  /* .likes:hover {
     background-color: rgb(255, 19, 19);
-  }
+  } */
 
-  .likes:active {
+  /* .likes:active {
     background-color: rgb(255, 109, 109);
-  }
+  } */
 
   .right-side p {
     font-size: 18px;

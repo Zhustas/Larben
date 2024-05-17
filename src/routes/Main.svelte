@@ -4,7 +4,6 @@
   import Map from "../pages/Map.svelte";
   import Account from "../pages/Account.svelte";
 
-  import { deleteSessionToken } from "./../HTTPfunctions.js";
   import Cookies from "js-cookie";
 
   if (!Cookies.get("sessionToken")) {
