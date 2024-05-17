@@ -105,6 +105,8 @@
 
 <h1 class="title">Larben</h1>
 <p class="welcome">Sveiki atvykę į Lietuvos Archeologijos Bendruomenę!</p>
+<h1 class="title">Larben</h1>
+<p class="welcome">Sveiki atvykę į Lietuvos Archeologijos Bendruomenę!</p>
 
 <form autocomplete="on">
   <label for="username">Vartotojo vardas</label>
@@ -116,6 +118,7 @@
   <button on:click|preventDefault={login} id="login-btn">Prisijungti</button>
 </form>
 
+<!-- <hr /> -->
 <!-- <hr /> -->
 <div class="bot-region">
   <p>Neturi paskyros? Spausk registracijos mygtuką.</p>
@@ -138,6 +141,7 @@
 </div>
 
 <style>
+  /* General Styling */
   /* General Styling */
   label {
     font-family: Arial, sans-serif;
