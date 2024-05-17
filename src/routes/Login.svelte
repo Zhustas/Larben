@@ -105,8 +105,6 @@
 
 <h1 class="title">Larben</h1>
 <p class="welcome">Sveiki atvykę į Lietuvos Archeologijos Bendruomenę!</p>
-<h1 class="title">Larben</h1>
-<p class="welcome">Sveiki atvykę į Lietuvos Archeologijos Bendruomenę!</p>
 
 <form autocomplete="on">
   <label for="username">Vartotojo vardas</label>
