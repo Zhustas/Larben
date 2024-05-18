@@ -309,19 +309,19 @@ const database = new sqlite3.Database("database/larben.db", (err) => {
   console.log("Database opened");
 });
 
-const privateKey = fs.readFileSync("certificate/key.pem");
-const certificate = fs.readFileSync("certificate/certificate.pem");
+// const privateKey = fs.readFileSync("certificate/key.pem");
+// const certificate = fs.readFileSync("certificate/certificate.pem");
 
-const server = https.createServer(
-  {
-    key: privateKey,
-    cert: certificate,
-    passphrase: process.env.CERTIFICATE_PASSPHRASE,
-  },
-  app
-);
+// const server = https.createServer(
+//   {
+//     key: privateKey,
+//     cert: certificate,
+//     passphrase: process.env.CERTIFICATE_PASSPHRASE,
+//   },
+//   app
+// );
 
-server.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Larben is listening on port ${port}`);
 });
 
