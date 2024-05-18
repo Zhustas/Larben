@@ -2,7 +2,7 @@
 
 Lietuvos Archeologijos Bendruomenė - Larben.  
 Projekto tikslas - sukurti svetainę, kuri būtų skirta Lietuvos archeologams.  
-Ką galėtume šioje svetainėje daryti: dalintis informacija susijusią su archeologija, naudoti žemėlapį, susipažinti su kitais archeologais, bendrauti.
+Ką galėtume šioje svetainėje daryti: dalintis informacija susijusią su archeologija, naudoti žemėlapį, susipažinti su kitais archeologais, bendrauti.  
 **Rollup Config** padarytas su https://typeofnan.dev/how-to-set-up-a-svelte-app-with-rollup/ pagalba. Ačiū.  
 
 Node.js
