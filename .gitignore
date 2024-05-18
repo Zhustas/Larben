@@ -3,3 +3,4 @@ public/build/
 *.env
 *.db
 certificate/
+.cjsescache

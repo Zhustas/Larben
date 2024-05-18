@@ -4,6 +4,7 @@ import replace from "@rollup/plugin-replace";
 import livereload from "rollup-plugin-livereload";
 import css from "rollup-plugin-css-only";
 import "dotenv/config";
+import cjs from "rollup-plugin-cjs-es";
 
 function serve() {
   // Keep a reference to a spawned server process
@@ -64,5 +65,6 @@ export default {
         process.env.CERTIFICATE_PASSPHRASE
       ),
     }),
+    cjs(), // To change .cjescache location use "cache" option
   ],
 };
