@@ -2,7 +2,6 @@
 
 Lietuvos Archeologijos Bendruomenė - Larben.  
 **Rollup Config** padarytas su https://typeofnan.dev/how-to-set-up-a-svelte-app-with-rollup/ pagalba. Ačiū.  
-Frontend paleidžiamas be **HTTPS**, o backend su **HTTPS** (Frontend irgi galima paleisti su **HTTPS**).
 
 Node.js
 
