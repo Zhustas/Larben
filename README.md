@@ -5,7 +5,7 @@ Projekto tikslas - sukurti svetainę, kuri būtų skirta Lietuvos archeologams.
 Ką būtų galima daryti šioje svetainėje: dalintis informacija susijusią su archeologija, naudotis žemėlapiu, susipažinti su kitais archeologais, bendrauti.  
 **Rollup Config** padarytas su https://typeofnan.dev/how-to-set-up-a-svelte-app-with-rollup/ pagalba. Ačiū.  
 Frontend kūrimui naudojama [Svelte](https://svelte.dev/){:target="_blank"} sistema, o backend - [Express.js](https://expressjs.com/){:target="_blank"}.
-
+<a href="http://example.com" target="_blank">Example</a>
 Node.js
 
 ```
