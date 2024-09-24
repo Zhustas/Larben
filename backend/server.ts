@@ -1,29 +1,27 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const sqlite3 = require('sqlite3');
-const https = require('https');
-const fs = require('fs');
+import express from 'express';
+import bodyParser from 'body-parser';
+import sqlite3, { Database } from 'sqlite3';
 require('dotenv').config();
 var cookieParser = require('cookie-parser');
 
-const { checkSessionTokenExists, validRequestBody } = require('./functions.js');
-const {
+import { checkSessionTokenExists, validRequestBody } from './functions.ts';
+import {
 	getUserBySessionToken,
 	getUsers,
 	getPosts,
 	getMarkers,
 	checkSessionTokenForExpiration
-} = require('./GET.js');
-const { insertUser, checkCredentials, insertPost, insertMarker } = require('./POST.js');
-const { updateUser, updatePost } = require('./PUT.js');
-const { deleteUser, deleteSessionToken, deletePost } = require('./DELETE.js');
+} from './get.ts';
+import { insertUser, checkCredentials, insertPost, insertMarker } from './post.ts';
+import { updateUser, updatePost } from './put.ts';
+import { deleteUser, deleteSessionToken, deletePost } from './delete.ts';
 
 const app = express();
 const jsonParser = bodyParser.json();
 
 app.use(cookieParser());
 
-app.use((req, res, next) => {
+app.use((_, res, next) => {
 	res.setHeader('Access-Control-Allow-Origin', 'https://localhost:8080');
 	res.setHeader(
 		'Access-Control-Allow-Headers',
@@ -34,11 +32,14 @@ app.use((req, res, next) => {
 	next();
 });
 
-// Get methods
+// ****************************************************************************
+// **************************************************************************** Get methods
+// ****************************************************************************
+
 app.get('/user', (req, res) => {
 	const sessionToken = req.cookies['sessionToken'];
 
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
 			getUserBySessionToken(database, res, sessionToken);
 		} else {
@@ -51,7 +52,7 @@ app.get('/user', (req, res) => {
 app.get('/users', (req, res) => {
 	const sessionToken = req.cookies['sessionToken'];
 
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
 			getUsers(database, res);
 		} else {
@@ -62,7 +63,7 @@ app.get('/users', (req, res) => {
 });
 
 app.get('/posts', (req, res) => {
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
 			getPosts(database, res);
 		} else {
@@ -75,7 +76,7 @@ app.get('/posts', (req, res) => {
 });
 
 app.get('/markers', (req, res) => {
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
 			getMarkers(database, res);
 		} else {
@@ -88,9 +89,9 @@ app.get('/markers', (req, res) => {
 });
 
 app.get('/checkSessionToken', (req, res) => {
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
-			checkSessionTokenForExpiration(database, req, res, sessionToken);
+			checkSessionTokenForExpiration(database, res, sessionToken);
 		} else {
 			res.send('Error');
 		}
@@ -100,7 +101,10 @@ app.get('/checkSessionToken', (req, res) => {
 	checkSessionTokenExists(database, sessionToken, callback);
 });
 
-// Post methods
+// ****************************************************************************
+// **************************************************************************** Post methods
+// ****************************************************************************
+
 app.post('/user', jsonParser, (req, res) => {
 	const expectations = {
 		NAME: 'string',
@@ -112,7 +116,7 @@ app.post('/user', jsonParser, (req, res) => {
 		DESCRIPTION: 'string'
 	};
 
-	if (!validRequestBody(req.body, expectations)) {
+	if (!validRequestBody(req, expectations)) {
 		res.send('Error in request body');
 		return;
 	}
@@ -149,7 +153,7 @@ app.post('/post', jsonParser, (req, res) => {
 		return;
 	}
 
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
 			insertPost(database, req, res);
 		} else {
@@ -178,7 +182,7 @@ app.post('/marker', jsonParser, (req, res) => {
 
 	console.log('as');
 
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
 			insertMarker(database, req, res);
 		} else {
@@ -190,11 +194,14 @@ app.post('/marker', jsonParser, (req, res) => {
 	checkSessionTokenExists(database, sessionToken, callback);
 });
 
-// Delete methods
+// ****************************************************************************
+// **************************************************************************** Delete methods
+// ****************************************************************************
+
 app.delete('/user/:id', (req, res) => {
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
-			deleteUser(database, res, req.params['id']);
+			deleteUser(database, res, Number(req.params['id']));
 		} else {
 			res.send('Error');
 		}
@@ -205,7 +212,7 @@ app.delete('/user/:id', (req, res) => {
 });
 
 app.delete('/sessionToken', (req, res) => {
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
 			deleteSessionToken(database, res, sessionToken);
 		} else {
@@ -218,9 +225,9 @@ app.delete('/sessionToken', (req, res) => {
 });
 
 app.delete('/post/:id', (req, res) => {
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
-			deletePost(database, res, req.params['id']);
+			deletePost(database, res, Number(req.params['id']));
 		} else {
 			res.send('Error');
 		}
@@ -230,7 +237,10 @@ app.delete('/post/:id', (req, res) => {
 	checkSessionTokenExists(database, sessionToken, callback);
 });
 
-// Put methods
+// ****************************************************************************
+// **************************************************************************** Put methods
+// ****************************************************************************
+
 app.put('/user/:id', jsonParser, (req, res) => {
 	const expectations = {
 		NAME: 'string',
@@ -244,9 +254,9 @@ app.put('/user/:id', jsonParser, (req, res) => {
 		return;
 	}
 
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
-			updateUser(database, req, res, req.params['id']);
+			updateUser(database, req, res, Number(req.params['id']));
 		} else {
 			res.send('Error');
 		}
@@ -266,9 +276,9 @@ app.put('/post/:id', jsonParser, (req, res) => {
 		return;
 	}
 
-	function callback(tokenExists) {
+	function callback(tokenExists: boolean) {
 		if (tokenExists) {
-			updatePost(database, req, res, req.params['id']);
+			updatePost(database, req, res, Number(req.params['id']));
 		} else {
 			res.send('Error');
 		}
@@ -277,6 +287,10 @@ app.put('/post/:id', jsonParser, (req, res) => {
 	const sessionToken = req.cookies['sessionToken'];
 	checkSessionTokenExists(database, sessionToken, callback);
 });
+
+// ****************************************************************************
+// **************************************************************************** Main
+// ****************************************************************************
 
 function gracefulShutdown() {
 	database.close((err) => {
@@ -297,7 +311,7 @@ function gracefulShutdown() {
 }
 
 const port = 3000;
-const database = new sqlite3.Database('database/larben.db', (err) => {
+const database: Database = new sqlite3.Database('database/larben.db', (err) => {
 	if (err) {
 		return console.error(err.message);
 	}

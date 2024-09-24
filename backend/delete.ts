@@ -1,5 +1,8 @@
+import { Response } from 'express';
+import { Database } from 'sqlite3';
+
 // Delete user
-function deleteUser(database, res, id) {
+function deleteUser(database: Database, res: Response, id: number) {
 	database.run('DELETE FROM Users WHERE ID = ?', id, (err) => {
 		if (err) {
 			res.send('Error in deleting user');
@@ -12,7 +15,7 @@ function deleteUser(database, res, id) {
 }
 
 // Delete session token
-function deleteSessionToken(database, res, sessionToken) {
+function deleteSessionToken(database: Database, res: Response, sessionToken: string) {
 	const sql = 'DELETE FROM SessionTokens WHERE TOKEN = ?';
 	database.run(sql, sessionToken, (err) => {
 		if (err) {
@@ -26,7 +29,7 @@ function deleteSessionToken(database, res, sessionToken) {
 }
 
 // Delete post
-function deletePost(database, res, id) {
+function deletePost(database: Database, res: Response, id: number) {
 	database.run('DELETE FROM Posts WHERE ID = ?', id, (err) => {
 		if (err) {
 			res.send('Error in deleting post');
@@ -38,4 +41,4 @@ function deletePost(database, res, id) {
 	});
 }
 
-module.exports = { deleteUser, deleteSessionToken, deletePost };
+export { deleteUser, deleteSessionToken, deletePost };

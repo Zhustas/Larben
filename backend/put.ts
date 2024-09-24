@@ -1,5 +1,8 @@
+import { Request, Response } from 'express';
+import { Database } from 'sqlite3';
+
 // Update user
-function updateUser(database, req, res, id) {
+function updateUser(database: Database, req: Request, res: Response, id: number) {
 	const user = req.body;
 
 	const sql = `
@@ -20,7 +23,7 @@ function updateUser(database, req, res, id) {
 }
 
 // Update post
-function updatePost(database, req, res, id) {
+function updatePost(database: Database, req: Request, res: Response, id: number) {
 	const post = req.body;
 
 	const sql = `
@@ -40,4 +43,4 @@ function updatePost(database, req, res, id) {
 	});
 }
 
-module.exports = { updateUser, updatePost };
+export { updateUser, updatePost };

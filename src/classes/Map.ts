@@ -3,21 +3,23 @@
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 
 export default class Map {
-	#MAPS_API_KEY;
-	#GEOCODING_API_KEY;
-	#map;
+	#MAPS_API_KEY: String;
+	#GEOCODING_API_KEY: String;
+	#map: google.maps.Map;
 	#mapOptions = {
 		zoom: 7,
 		center: { lat: 55.1694, lng: 23.8813 },
 		mapId: 'MAP_ID'
 	};
-	#currentLatLng;
+	#currentLatLng: google.maps.LatLng;
 	#marker;
-	#clickedOnMarker;
+	#clickedOnMarker: boolean;
 
-	constructor(MAPS_API_KEY, GEOCODING_API_KEY) {
+	constructor(MAPS_API_KEY: String, GEOCODING_API_KEY: String) {
 		this.#MAPS_API_KEY = MAPS_API_KEY;
 		this.#GEOCODING_API_KEY = GEOCODING_API_KEY;
+
+		this.#clickedOnMarker = false;
 	}
 
 	loadMapsAPI() {
@@ -26,7 +28,7 @@ export default class Map {
 				a,
 				k,
 				p = 'The Google Maps JavaScript API',
-				c = 'google',
+				c: String = 'google',
 				l = 'importLibrary',
 				q = '__ib__',
 				m = document,
@@ -112,7 +114,7 @@ export default class Map {
 		});
 	}
 
-	setClicedkOnMarker(value) {
+	setClicedkOnMarker(value: boolean) {
 		this.#clickedOnMarker = value;
 	}
 
@@ -120,10 +122,8 @@ export default class Map {
 		return this.#clickedOnMarker;
 	}
 
-	async loadMarkers(markers, id, users) {
+	async loadMarkers(markers, users) {
 		const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
-
-		const currentID = id;
 
 		const currentMarker = new PinElement({
 			background: '#3232FF',
@@ -146,9 +146,9 @@ export default class Map {
 			}
 			const infoWindow = new google.maps.InfoWindow({
 				content: `
-        <strong>Vartotojas: ${username}</strong>
-        <div></div>
-        <strong>Aprašymas: ${value['DESCRIPTION']}</strong>`
+					<strong>Vartotojas: ${username}</strong>
+					<div></div>
+					<strong>Aprašymas: ${value['DESCRIPTION']}</strong>`
 			});
 
 			let marker = new AdvancedMarkerElement({ position });

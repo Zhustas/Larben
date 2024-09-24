@@ -1,237 +1,237 @@
-<script>
-  import Map from "../classes/Map.js";
+<script lang="ts">
+	import Map from '../classes/Map.js';
 
-  // sendGETCookieCheck();
+	const a: number = 5;
 
-  // function sendGETCookieCheck() {
-  //   const hr = new XMLHttpRequest();
-  //   hr.open("GET", "http://localhost:3000/checkSessionToken");
-  //   hr.withCredentials = true;
-  //   hr.send();
-  //   hr.onload = () => {
-  //     console.log(hr.response);
-  //     if (hr.response === "Expired") {
-  //       Cookies.remove("sessionToken");
-  //       wincow.location = "/";
-  //     } else if (hr.response === "Don't exist") {
-  //       window.location = "/";
-  //     }
-  //   };
-  // }
+	// sendGETCookieCheck();
 
-  let user = {};
-  let users = {};
+	// function sendGETCookieCheck() {
+	//   const hr = new XMLHttpRequest();
+	//   hr.open("GET", "http://localhost:3000/checkSessionToken");
+	//   hr.withCredentials = true;
+	//   hr.send();
+	//   hr.onload = () => {
+	//     console.log(hr.response);
+	//     if (hr.response === "Expired") {
+	//       Cookies.remove("sessionToken");
+	//       wincow.location = "/";
+	//     } else if (hr.response === "Don't exist") {
+	//       window.location = "/";
+	//     }
+	//   };
+	// }
 
-  (async function () {
-    await getUser();
-    await getAllUsers();
-    await loadMarkers();
-  })();
+	let user = {};
+	let users = {};
 
-  async function getUser() {
-    const hr = new XMLHttpRequest();
-    hr.open("GET", "https://localhost:3000/user");
-    hr.withCredentials = true;
-    hr.send();
-    hr.onload = () => {
-      user = JSON.parse(hr.response);
-    };
-  }
+	(async function () {
+		await getUser();
+		await getAllUsers();
+		await loadMarkers();
+	})();
 
-  async function getAllUsers() {
-    const hr = new XMLHttpRequest();
-    hr.open("GET", "https://localhost:3000/users");
-    hr.withCredentials = true;
-    hr.send();
-    hr.onload = () => {
-      users = JSON.parse(hr.response);
-    };
-  }
+	async function getUser() {
+		const hr = new XMLHttpRequest();
+		hr.open('GET', 'https://localhost:3000/user');
+		hr.withCredentials = true;
+		hr.send();
+		hr.onload = () => {
+			user = JSON.parse(hr.response);
+		};
+	}
 
-  async function loadMarkers() {
-    const hr = new XMLHttpRequest();
-    hr.open("GET", "https://localhost:3000/markers");
-    hr.withCredentials = true;
-    hr.send();
-    hr.onload = () => {
-      if (hr.response) {
-        const res = JSON.parse(hr.response);
+	async function getAllUsers() {
+		const hr = new XMLHttpRequest();
+		hr.open('GET', 'https://localhost:3000/users');
+		hr.withCredentials = true;
+		hr.send();
+		hr.onload = () => {
+			users = JSON.parse(hr.response);
+		};
+	}
 
-        map.loadMarkers(res, user["ID"], users);
-      }
-    };
-  }
+	async function loadMarkers() {
+		const hr = new XMLHttpRequest();
+		hr.open('GET', 'https://localhost:3000/markers');
+		hr.withCredentials = true;
+		hr.send();
+		hr.onload = () => {
+			if (hr.response) {
+				const res = JSON.parse(hr.response);
 
-  function addMarker() {
-    // Check if description is not empty
-    if (!description) {
-      return;
-    }
+				map.loadMarkers(res, user['ID'], users);
+			}
+		};
+	}
 
-    // Get current latitude and longitude
-    const { lat, lng } = map.getCurrentLatLng();
+	function addMarker() {
+		// Check if description is not empty
+		if (!description) {
+			return;
+		}
 
-    // Convert information into object
-    const marker = {
-      USER_ID: user["ID"],
-      DESCRIPTION: description,
-      LATITUDE: lat,
-      LONGITUDE: lng,
-    };
+		// Get current latitude and longitude
+		const { lat, lng } = map.getCurrentLatLng();
 
-    // Convert object to json
-    const markerString = JSON.stringify(marker);
+		// Convert information into object
+		const marker = {
+			USER_ID: user['ID'],
+			DESCRIPTION: description,
+			LATITUDE: lat,
+			LONGITUDE: lng
+		};
 
-    // Make POST request
-    doPOST(markerString);
+		// Convert object to json
+		const markerString = JSON.stringify(marker);
 
-    map.addMarker(map.getCurrentLatLng());
+		// Make POST request
+		doPOST(markerString);
 
-    // Hide add marker container
-    hideAddMarkerContainer();
-  }
+		map.addMarker(map.getCurrentLatLng());
 
-  function doPOST(markerString) {
-    const hr = new XMLHttpRequest();
-    hr.open("POST", "https://localhost:3000/marker");
-    hr.withCredentials = true;
-    hr.setRequestHeader("Content-Type", "application/json");
-    hr.send(markerString);
-    hr.onload = () => {
-      console.log(hr.response);
-    };
-  }
+		// Hide add marker container
+		hideAddMarkerContainer();
+	}
 
-  function hideAddMarkerContainer() {
-    addMarkerContainer.classList.add("hidden");
-    description = "";
-  }
+	function doPOST(markerString) {
+		const hr = new XMLHttpRequest();
+		hr.open('POST', 'https://localhost:3000/marker');
+		hr.withCredentials = true;
+		hr.setRequestHeader('Content-Type', 'application/json');
+		hr.send(markerString);
+		hr.onload = () => {
+			console.log(hr.response);
+		};
+	}
 
-  function hideAddMarkerContainerAndRemoveMarker() {
-    addMarkerContainer.classList.add("hidden");
-    map.removeMarker();
-    description = "";
-  }
+	function hideAddMarkerContainer() {
+		addMarkerContainer.classList.add('hidden');
+		description = '';
+	}
 
-  async function handleMapClick() {
-    let currentLatLng = map.getCurrentLatLng();
-    if (currentLatLng) {
-      let isPointValid = await map.isPointInLithuania(currentLatLng);
+	function hideAddMarkerContainerAndRemoveMarker() {
+		addMarkerContainer.classList.add('hidden');
+		map.removeMarker();
+		description = '';
+	}
 
-      if (isPointValid && !map.clickedOnMarker()) {
-        addMarkerContainer.classList.remove("hidden");
-      } else {
-        hideAddMarkerContainerAndRemoveMarker();
-      }
-    }
+	async function handleMapClick() {
+		let currentLatLng = map.getCurrentLatLng();
+		if (currentLatLng) {
+			let isPointValid = await map.isPointInLithuania(currentLatLng);
 
-    map.setClicedkOnMarker(false);
-  }
+			if (isPointValid && !map.clickedOnMarker()) {
+				addMarkerContainer.classList.remove('hidden');
+			} else {
+				hideAddMarkerContainerAndRemoveMarker();
+			}
+		}
 
-  let markerAdded = false;
-  let description = "";
-  let addMarkerContainer;
+		map.setClicedkOnMarker(false);
+	}
 
-  let MAPS_API_KEY = process.env.MAPS_API_KEY;
-  let GEOCODING_API_KEY = process.env.GEOCODING_API_KEY;
+	let markerAdded = false;
+	let description = '';
+	let addMarkerContainer;
 
-  let map = new Map(MAPS_API_KEY, GEOCODING_API_KEY);
+	let MAPS_API_KEY = process.env.MAPS_API_KEY;
+	let GEOCODING_API_KEY = process.env.GEOCODING_API_KEY;
 
-  map.loadMapsAPI();
-  map.initMap();
+	let map = new Map(MAPS_API_KEY, GEOCODING_API_KEY);
+
+	map.loadMapsAPI();
+	map.initMap();
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
 <div on:click={handleMapClick} id="map"></div>
 <div bind:this={addMarkerContainer} id="add-marker-container" class="hidden">
-  <label for="description">Aprašymas</label>
-  <textarea bind:value={description} id="description"></textarea>
-  <button on:click={hideAddMarkerContainerAndRemoveMarker} class="cancel-btn"
-    >Atšaukti</button
-  >
-  <button on:click={addMarker} class="add-btn">Pridėti žymeklį</button>
+	<label for="description">Aprašymas</label>
+	<textarea bind:value={description} id="description"></textarea>
+	<button on:click={hideAddMarkerContainerAndRemoveMarker} class="cancel-btn">Atšaukti</button>
+	<button on:click={addMarker} class="add-btn">Pridėti žymeklį</button>
 </div>
 
 <style>
-  .add-btn {
-    float: right;
-    margin: 5px 15px 0 0;
-    height: 40px;
-    width: 150px;
-    color: white;
-    cursor: pointer;
+	.add-btn {
+		float: right;
+		margin: 5px 15px 0 0;
+		height: 40px;
+		width: 150px;
+		color: white;
+		cursor: pointer;
 
-    margin: 5px 15px 0 0;
-    background-color: rgb(56, 196, 91);
-  }
+		margin: 5px 15px 0 0;
+		background-color: rgb(56, 196, 91);
+	}
 
-  .cancel-btn {
-    margin: 5px 0 0 10px;
-    height: 40px;
-    width: 80px;
-    color: white;
-    cursor: pointer;
-    background-color: rgb(208, 219, 56);
-  }
+	.cancel-btn {
+		margin: 5px 0 0 10px;
+		height: 40px;
+		width: 80px;
+		color: white;
+		cursor: pointer;
+		background-color: rgb(208, 219, 56);
+	}
 
-  .cancel-btn:hover {
-    background-color: rgb(178, 187, 57);
-  }
+	.cancel-btn:hover {
+		background-color: rgb(178, 187, 57);
+	}
 
-  .cancel-btn:active {
-    background-color: rgb(243, 253, 104);
-  }
+	.cancel-btn:active {
+		background-color: rgb(243, 253, 104);
+	}
 
-  .add-btn:hover {
-    background-color: rgb(36, 155, 66);
-  }
+	.add-btn:hover {
+		background-color: rgb(36, 155, 66);
+	}
 
-  .add-btn:active {
-    background-color: rgb(85, 231, 122);
-  }
+	.add-btn:active {
+		background-color: rgb(85, 231, 122);
+	}
 
-  #map {
-    width: 80%;
-    /* width: 80%; */
-    /* height: 700px; */
-    height: 100%;
+	#map {
+		width: 80%;
+		/* width: 80%; */
+		/* height: 700px; */
+		height: 100%;
 
-    /* width: 350px; */
-    /* height: 500px; */
+		/* width: 350px; */
+		/* height: 500px; */
 
-    float: left;
+		float: left;
 
-    border-right: 2px solid black;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
-  }
+		border-right: 2px solid black;
+		border-top: 2px solid black;
+		border-bottom: 2px solid black;
+	}
 
-  label {
-    display: block;
-    margin: 10px 0 0 10px;
-    font-size: 18px;
-  }
+	label {
+		display: block;
+		margin: 10px 0 0 10px;
+		font-size: 18px;
+	}
 
-  textarea {
-    margin: 10px 0 0 10px;
-    resize: vertical;
-    min-height: 10%;
-    width: 90%;
-    max-height: 50%;
-    font-size: 18px;
-  }
+	textarea {
+		margin: 10px 0 0 10px;
+		resize: vertical;
+		min-height: 10%;
+		width: 90%;
+		max-height: 50%;
+		font-size: 18px;
+	}
 
-  #add-marker-container {
-    width: 19%;
-    height: 100%;
-    background-color: white;
-    float: left;
-    border-right: 2px solid black;
-    border-top: 2px solid black;
-    border-bottom: 2px solid black;
-  }
+	#add-marker-container {
+		width: 19%;
+		height: 100%;
+		background-color: white;
+		float: left;
+		border-right: 2px solid black;
+		border-top: 2px solid black;
+		border-bottom: 2px solid black;
+	}
 
-  .hidden {
-    display: none;
-  }
+	.hidden {
+		display: none;
+	}
 </style>

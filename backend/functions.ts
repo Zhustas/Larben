@@ -1,5 +1,8 @@
+import { Request } from 'express';
+import { Database } from 'sqlite3';
+
 // Check if given sessionToken exists in database
-function checkSessionTokenExists(database, sessionToken, callback) {
+function checkSessionTokenExists(database: Database, sessionToken: string, callback: Function) {
 	const sql = 'SELECT * FROM SessionTokens WHERE TOKEN = ?';
 
 	database.get(sql, sessionToken, (err, row) => {
@@ -17,7 +20,8 @@ function checkSessionTokenExists(database, sessionToken, callback) {
 }
 
 // Validates request body
-function validRequestBody(body, expectations) {
+function validRequestBody(req: Request, expectations: object) {
+	const body = req.body;
 	const bodyKeys = Object.keys(body);
 	let expKeys = Object.keys(expectations);
 
@@ -58,4 +62,34 @@ function validRequestBody(body, expectations) {
 	return true;
 }
 
-module.exports = { checkSessionTokenExists, validRequestBody };
+// Insert session token (not POST method)
+function insertSessionToken(database: Database, USER_ID: number) {
+	// SQL for inserting Session Token
+	const sql = `
+      INSERT INTO SessionTokens(USER_ID, TOKEN, TOKEN_CREATED)
+      VALUES (?, ?, ?);
+    `;
+
+	// Session Token values
+	const plus3Hours = 3 * 60 * 60 * 1000;
+	const crypto = require('crypto-js');
+
+	const values = [
+		USER_ID,
+		crypto.lib.WordArray.random(32).toString(),
+		new Date().getTime() + plus3Hours
+	];
+
+	// Insert Session Token
+	database.run(sql, values, (err) => {
+		if (err) {
+			return console.error(err);
+		}
+
+		console.log('Session token added');
+	});
+
+	return values[1];
+}
+
+export { checkSessionTokenExists, validRequestBody, insertSessionToken };

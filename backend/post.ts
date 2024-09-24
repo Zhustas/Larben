@@ -1,5 +1,9 @@
+import { Request, Response } from 'express';
+import { Database } from 'sqlite3';
+import { insertSessionToken } from './functions';
+
 // Insert user
-function insertUser(database, req, res) {
+function insertUser(database: Database, req: Request, res: Response) {
 	// Get user object from json
 	const user = req.body;
 
@@ -25,7 +29,7 @@ function insertUser(database, req, res) {
 }
 
 // Check credentials
-function checkCredentials(database, req, res, expirationTime) {
+function checkCredentials(database: Database, req: Request, res: Response, expirationTime: number) {
 	// Get username and password
 	const { USERNAME: username, PASSWORD: password } = req.body;
 
@@ -43,7 +47,7 @@ function checkCredentials(database, req, res, expirationTime) {
 		if (row) {
 			const token = insertSessionToken(database, row['ID']);
 
-			const plus3Hours = 3 * 60 * 60 * 1000;
+			const plus3Hours: number = 3 * 60 * 60 * 1000;
 			res
 				.cookie('sessionToken', token, {
 					maxAge: plus3Hours + expirationTime,
@@ -58,38 +62,8 @@ function checkCredentials(database, req, res, expirationTime) {
 	});
 }
 
-// Insert session token (not POST method)
-function insertSessionToken(database, USER_ID) {
-	// SQL for inserting Session Token
-	const sql = `
-      INSERT INTO SessionTokens(USER_ID, TOKEN, TOKEN_CREATED)
-      VALUES (?, ?, ?);
-    `;
-
-	// Session Token values
-	const plus3Hours = 3 * 60 * 60 * 1000;
-	const crypto = require('crypto-js');
-
-	const values = [
-		USER_ID,
-		crypto.lib.WordArray.random(32).toString(),
-		new Date().getTime() + plus3Hours
-	];
-
-	// Insert Session Token
-	database.run(sql, values, (err) => {
-		if (err) {
-			return console.error(err);
-		}
-
-		console.log('Session token added');
-	});
-
-	return values[1];
-}
-
 // Insert post
-function insertPost(database, req, res) {
+function insertPost(database: Database, req: Request, res: Response) {
 	// Get post object from json
 	const post = req.body;
 
@@ -115,7 +89,7 @@ function insertPost(database, req, res) {
 }
 
 // Insert marker
-function insertMarker(database, req, res) {
+function insertMarker(database: Database, req: Request, res: Response) {
 	// Get marker object from json
 	const marker = req.body;
 
@@ -140,4 +114,4 @@ function insertMarker(database, req, res) {
 	});
 }
 
-module.exports = { insertUser, checkCredentials, insertPost, insertMarker };
+export { insertUser, checkCredentials, insertPost, insertMarker };
