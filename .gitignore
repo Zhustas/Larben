@@ -1,7 +1,6 @@
 node_modules/
 .svelte-kit/
-
-public/build/
+build/
 
 *.env
 *.db

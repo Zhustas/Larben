@@ -1,20 +1,20 @@
-import express from 'express';
-import bodyParser from 'body-parser';
-import sqlite3, { Database } from 'sqlite3';
+const express = require('express');
+const bodyParser = require('body-parser');
+import { Database } from 'sqlite3';
 require('dotenv').config();
 var cookieParser = require('cookie-parser');
 
-import { checkSessionTokenExists, validRequestBody } from './functions.ts';
+import { checkSessionTokenExists, validRequestBody } from './functions';
 import {
 	getUserBySessionToken,
 	getUsers,
 	getPosts,
 	getMarkers,
 	checkSessionTokenForExpiration
-} from './get.ts';
-import { insertUser, checkCredentials, insertPost, insertMarker } from './post.ts';
-import { updateUser, updatePost } from './put.ts';
-import { deleteUser, deleteSessionToken, deletePost } from './delete.ts';
+} from './get';
+import { insertUser, checkCredentials, insertPost, insertMarker } from './post';
+import { updateUser, updatePost } from './put';
+import { deleteUser, deleteSessionToken, deletePost } from './delete';
 
 const app = express();
 const jsonParser = bodyParser.json();
@@ -311,7 +311,7 @@ function gracefulShutdown() {
 }
 
 const port = 3000;
-const database: Database = new sqlite3.Database('database/larben.db', (err) => {
+const database: Database = new Database('database/larben.db', (err) => {
 	if (err) {
 		return console.error(err.message);
 	}

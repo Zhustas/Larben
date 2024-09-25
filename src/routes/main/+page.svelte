@@ -1,13 +1,13 @@
-<script>
-	import Crier from '../pages/Crier.svelte';
-	import Guild from '../pages/Guild.svelte';
-	import Map from '../pages/Map.svelte';
-	import Account from '../pages/Account.svelte';
+<script lang="ts">
+	import Crier from '../../components/Crier.svelte';
+	import Guild from '../../components/Guild.svelte';
+	import Map from '../../components/Map.svelte';
+	import Account from '../../components/Account.svelte';
 
 	import Cookies from 'js-cookie';
 
 	if (!Cookies.get('sessionToken')) {
-		window.location = '/';
+		window.location.assign('/');
 	} else {
 		const hr = new XMLHttpRequest();
 		hr.open('GET', 'https://localhost:3000/checkSessionToken');
@@ -24,7 +24,7 @@
 				hr2.send();
 				hr2.onload = () => {
 					Cookies.remove('sessionToken');
-					window.location = '/';
+					window.location.assign('/');
 				};
 			}
 		};
@@ -44,7 +44,7 @@
 
 	function handleLogOut() {
 		Cookies.remove('sessionToken');
-		window.location = '/';
+		window.location.assign('/');
 	}
 
 	let map;

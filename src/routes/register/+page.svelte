@@ -1,13 +1,13 @@
-<script>
+<script lang="ts">
 	let name = '';
 	let lastName = '';
-	let date;
+	let date: Date;
 	let username = '';
 	let email = '';
 	let password = '',
 		passwordRepeat = '';
 
-	const errors = [];
+	const errors: object[] = [];
 
 	function register() {
 		// Clear errors list
@@ -16,7 +16,7 @@
 		// Check for errors in fields
 		let ret = checkForErrorsAndReturn();
 		if (ret !== 0) {
-			showErrors(errors);
+			showErrors();
 			return;
 		}
 
@@ -40,14 +40,14 @@
 		doPOST(userString);
 	}
 
-	function doPOST(userString) {
+	function doPOST(userString: string) {
 		const hr = new XMLHttpRequest();
 		hr.open('POST', 'https://localhost:3000/user');
 		hr.setRequestHeader('Content-Type', 'application/json');
 		hr.send(userString);
 		hr.onload = () => {
 			if (hr.response === 'User added') {
-				window.location = '/';
+				window.location.assign('/');
 			}
 		};
 	}
@@ -82,7 +82,7 @@
 		return 0;
 	}
 
-	function showErrors(errors) {
+	function showErrors() {
 		console.log(errors);
 	}
 </script>

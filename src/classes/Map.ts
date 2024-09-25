@@ -1,66 +1,43 @@
 'use strict';
 
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import { Loader } from '@googlemaps/js-api-loader';
+import type { UserDB, MarkerDB } from './DatabaseClasses';
 
 export default class Map {
-	#MAPS_API_KEY: String;
-	#GEOCODING_API_KEY: String;
+	#MAPS_API_KEY: string;
+	#GEOCODING_API_KEY: string;
 	#map: google.maps.Map;
 	#mapOptions = {
 		zoom: 7,
 		center: { lat: 55.1694, lng: 23.8813 },
 		mapId: 'MAP_ID'
 	};
-	#currentLatLng: google.maps.LatLng;
-	#marker;
+	#currentLatLng: google.maps.LatLngLiteral;
+	#marker: google.maps.marker.AdvancedMarkerElement | undefined;
 	#clickedOnMarker: boolean;
+	#loader: Loader;
+	#mapLibrary: google.maps.MapsLibrary | undefined;
+	#markerLibrary: google.maps.MarkerLibrary | undefined;
 
-	constructor(MAPS_API_KEY: String, GEOCODING_API_KEY: String) {
+	constructor(MAPS_API_KEY: string, GEOCODING_API_KEY: string) {
 		this.#MAPS_API_KEY = MAPS_API_KEY;
 		this.#GEOCODING_API_KEY = GEOCODING_API_KEY;
 
+		this.#map = new google.maps.Map(document.getElementById('map')!, this.#mapOptions);
+		this.#currentLatLng = { lat: 0, lng: 0 };
 		this.#clickedOnMarker = false;
+
+		this.#loader = new Loader({
+			apiKey: this.#MAPS_API_KEY,
+			version: 'weekly'
+		});
 	}
 
-	loadMapsAPI() {
-		((g) => {
-			var h,
-				a,
-				k,
-				p = 'The Google Maps JavaScript API',
-				c: String = 'google',
-				l = 'importLibrary',
-				q = '__ib__',
-				m = document,
-				b = window;
-			b = b[c] || (b[c] = {});
-			var d = b.maps || (b.maps = {}),
-				r = new Set(),
-				e = new URLSearchParams(),
-				u = () =>
-					h ||
-					(h = new Promise(async (f, n) => {
-						await (a = m.createElement('script'));
-						e.set('libraries', [...r] + '');
-						for (k in g)
-							e.set(
-								k.replace(/[A-Z]/g, (t) => '_' + t[0].toLowerCase()),
-								g[k]
-							);
-						e.set('callback', c + '.maps.' + q);
-						a.src = `https://maps.${c}apis.com/maps/api/js?` + e;
-						d[q] = f;
-						a.onerror = () => (h = n(Error(p + ' could not load.')));
-						a.nonce = m.querySelector('script[nonce]')?.nonce || '';
-						m.head.append(a);
-					}));
-			d[l]
-				? console.warn(p + ' only loads once. Ignoring:', g)
-				: (d[l] = (f, ...n) => r.add(f) && u().then(() => d[l](f, ...n)));
-		})({
-			key: this.#MAPS_API_KEY,
-			v: 'weekly'
-		});
+	public async loadMapsAPI() {
+		this.#mapLibrary = (await this.#loader.importLibrary('maps')) as google.maps.MapsLibrary;
+		this.#map = new this.#mapLibrary.Map(document.getElementById('map')!, this.#mapOptions);
+		this.#markerLibrary = (await this.#loader.importLibrary('marker')) as google.maps.MarkerLibrary;
 	}
 
 	getCurrentLatLng() {
@@ -68,33 +45,30 @@ export default class Map {
 	}
 
 	async initMap() {
-		const { Map } = await google.maps.importLibrary('maps');
+		this.#map.addListener('click', async (mapsMouseEvent: google.maps.MapMouseEvent) => {
+			if (mapsMouseEvent && mapsMouseEvent.latLng) {
+				let latLng = mapsMouseEvent.latLng.toJSON();
 
-		this.#map = new Map(document.getElementById('map'), this.#mapOptions);
+				this.#currentLatLng = latLng;
+				let isPointValid = await this.isPointInLithuania(this.#currentLatLng);
 
-		this.#map.addListener('click', async (mapsMouseEvent) => {
-			let latLng = mapsMouseEvent.latLng.toJSON();
-
-			this.#currentLatLng = latLng;
-			let isPointValid = await this.isPointInLithuania(this.#currentLatLng);
-
-			if (isPointValid) {
-				if (this.#marker) {
-					this.removeMarker();
+				if (isPointValid) {
+					if (this.#marker) {
+						this.removeMarker();
+					}
+					this.addMarker(latLng);
 				}
-				this.addMarker(latLng);
 			}
 		});
 	}
 
 	removeMarker() {
-		this.#marker?.setMap(null);
+		// this.#marker?.setMap(null);
 		this.#marker = undefined;
 	}
 
-	async addMarker(latLng) {
-		const { AdvancedMarkerElement, PinElement, InfoWindow } =
-			await google.maps.importLibrary('marker');
+	async addMarker(latLng: google.maps.LatLngLiteral) {
+		const { AdvancedMarkerElement, PinElement } = this.#markerLibrary as google.maps.MarkerLibrary;
 
 		const pinBackground = new PinElement({
 			background: '#3232FF',
@@ -122,37 +96,31 @@ export default class Map {
 		return this.#clickedOnMarker;
 	}
 
-	async loadMarkers(markers, users) {
-		const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary('marker');
+	async loadMarkers(markers: MarkerDB[], users: UserDB[]) {
+		const { AdvancedMarkerElement } = this.#markerLibrary as google.maps.MarkerLibrary;
 
-		const currentMarker = new PinElement({
-			background: '#3232FF',
-			glyphColor: '#B2B2FF',
-			borderColor: '#00007F'
-		});
-
-		markers = markers.map((value) => {
-			const position = {
-				lat: value['LATITUDE'],
-				lng: value['LONGITUDE']
-			};
-
+		const originalMarkers = markers.map((value) => {
 			let username;
 			for (let user of users) {
-				if (user['ID'] === value['USER_ID']) {
-					username = user['USERNAME'];
+				if (user.id === value.id) {
+					username = user.username;
 					break;
 				}
 			}
+
 			const infoWindow = new google.maps.InfoWindow({
 				content: `
-					<strong>Vartotojas: ${username}</strong>
+					<strong>${username}</strong>
 					<div></div>
-					<strong>Aprašymas: ${value['DESCRIPTION']}</strong>`
+					<strong>${value.description ?? ''}</strong>`
 			});
 
-			let marker = new AdvancedMarkerElement({ position });
+			const position = {
+				lat: value.latitude,
+				lng: value.longitude
+			};
 
+			let marker = new AdvancedMarkerElement({ position });
 			marker.addListener('click', () => {
 				infoWindow.open({
 					anchor: marker,
@@ -165,12 +133,12 @@ export default class Map {
 
 		new MarkerClusterer({
 			map: this.#map,
-			markers: markers
+			markers: originalMarkers
 		});
 	}
 
-	async isPointInLithuania({ lat: latitude, lng: longitude }) {
-		let url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${
+	async isPointInLithuania({ lat, lng }: google.maps.LatLngLiteral) {
+		let url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${
 			this.#GEOCODING_API_KEY
 		}`;
 

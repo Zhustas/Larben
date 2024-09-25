@@ -1,7 +1,6 @@
 <script lang="ts">
-	import Map from '../classes/Map.js';
-
-	const a: number = 5;
+	import type { UserDB } from '../classes/DatabaseClasses';
+	import Map from '../classes/Map';
 
 	// sendGETCookieCheck();
 
@@ -21,8 +20,8 @@
 	//   };
 	// }
 
-	let user = {};
-	let users = {};
+	let user: UserDB;
+	let users: UserDB[] = [];
 
 	(async function () {
 		await getUser();
@@ -59,7 +58,7 @@
 			if (hr.response) {
 				const res = JSON.parse(hr.response);
 
-				map.loadMarkers(res, user['ID'], users);
+				map.loadMarkers(res, users);
 			}
 		};
 	}
@@ -75,7 +74,7 @@
 
 		// Convert information into object
 		const marker = {
-			USER_ID: user['ID'],
+			USER_ID: user.id,
 			DESCRIPTION: description,
 			LATITUDE: lat,
 			LONGITUDE: lng
@@ -93,7 +92,7 @@
 		hideAddMarkerContainer();
 	}
 
-	function doPOST(markerString) {
+	function doPOST(markerString: string) {
 		const hr = new XMLHttpRequest();
 		hr.open('POST', 'https://localhost:3000/marker');
 		hr.withCredentials = true;
@@ -132,10 +131,10 @@
 
 	let markerAdded = false;
 	let description = '';
-	let addMarkerContainer;
+	let addMarkerContainer: HTMLElement;
 
-	let MAPS_API_KEY = process.env.MAPS_API_KEY;
-	let GEOCODING_API_KEY = process.env.GEOCODING_API_KEY;
+	let MAPS_API_KEY = process.env.MAPS_API_KEY!;
+	let GEOCODING_API_KEY = process.env.GEOCODING_API_KEY!;
 
 	let map = new Map(MAPS_API_KEY, GEOCODING_API_KEY);
 

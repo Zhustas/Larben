@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Cookies from 'js-cookie';
 
 	if (Cookies.get('sessionToken')) {
@@ -21,7 +21,7 @@
 					Cookies.remove('sessionToken');
 				};
 			} else {
-				window.location = '/main';
+				window.location.assign('/main');
 			}
 		};
 	}
@@ -43,7 +43,7 @@
 		doPOST(userString);
 	}
 
-	function doPOST(userString) {
+	function doPOST(userString: string) {
 		const hr = new XMLHttpRequest();
 		hr.open('POST', 'https://localhost:3000/checkCredentials');
 		hr.setRequestHeader('Content-Type', 'application/json');
@@ -51,17 +51,17 @@
 		hr.send(userString);
 		hr.onload = () => {
 			if (hr.response === 'User authorized') {
-				window.location = '/main';
+				window.location.assign('/main');
 			}
 		};
 	}
 
 	function register() {
-		window.location = '/register';
+		window.location.assign('/register');
 	}
 
 	// *********************************** Cookies ***************************************
-	function setCookie(cName, cValue, expDays) {
+	function setCookie(cName: string, cValue: any, expDays: number) {
 		let date = new Date();
 		date.setTime(date.getTime() + expDays * 24 * 60 * 60 * 1000);
 
@@ -71,7 +71,7 @@
 		document.cookie = cName + '=' + cValue + '; ' + expires + '; path=/'; // path=/main
 	}
 
-	function getCookie(cName) {
+	function getCookie(cName: string) {
 		const name = cName + '=';
 		const cDecoded = decodeURIComponent(document.cookie);
 		const cArray = cDecoded.split('; ');
@@ -88,12 +88,12 @@
 
 	function cookieMessage() {
 		if (!getCookie('cookie')) {
-			document.querySelector('#cookies').style.display = 'block';
+			document.querySelector<HTMLElement>('#cookies')!.style.display = 'block';
 		}
 	}
 
 	function cookiesOnClick() {
-		document.querySelector('#cookies').style.display = 'none';
+		document.querySelector<HTMLElement>('#cookies')!.style.display = 'none';
 
 		// Creating cookie (expire in 30 days)
 		setCookie('cookie', true, 30);
