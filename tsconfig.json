@@ -1,5 +1,7 @@
 {
 	"extends": "./.svelte-kit/tsconfig.json",
+	"include": ["backend/", "src/**/*"],
+	"exclude": ["src/classes/*"],
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
@@ -7,10 +9,15 @@
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
-		"sourceMap": true,
 		"strict": true,
-		"moduleResolution": "bundler",
+		"moduleResolution": "Bundler",
 		"outDir": "build",
-		"noEmit": false
+		"noEmit": false,
+		"target": "ES6",
+		"module": "ESNext",
+		"allowSyntheticDefaultImports": true
+	},
+	"tsc-alias": {
+		"resolveFullPaths": true
 	}
 }

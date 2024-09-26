@@ -50,6 +50,7 @@
 				window.location.assign('/');
 			}
 		};
+		console.log('sent!');
 	}
 
 	function checkForErrorsAndReturn() {

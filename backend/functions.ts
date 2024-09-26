@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import type { Request } from 'express';
 import { Database } from 'sqlite3';
 
 // Check if given sessionToken exists in database
@@ -20,7 +20,7 @@ function checkSessionTokenExists(database: Database, sessionToken: string, callb
 }
 
 // Validates request body
-function validRequestBody(req: Request, expectations: object) {
+function validRequestBody(req: Request, expectations: object): boolean {
 	const body = req.body;
 	const bodyKeys = Object.keys(body);
 	let expKeys = Object.keys(expectations);
@@ -43,14 +43,20 @@ function validRequestBody(req: Request, expectations: object) {
 		return false;
 	}
 
+	const keys: string[] = Object.keys(expectations);
+	const values: string[] = Object.values(expectations);
+
 	// Bad data types
 	for (const key of bodyKeys) {
-		if (expectations[key] === 'int' || expectations[key] === 'double') {
+		const index: number = keys.indexOf(key);
+		const expectedType: string = values[index];
+
+		if (expectedType === 'int' || expectedType === 'double') {
 			// Expected number
 			if (typeof body[key] !== 'number') {
 				return false;
 			}
-		} else if (expectations[key] === 'date' || expectations[key] === 'datetime') {
+		} else if (expectedType === 'date' || expectedType === 'datetime') {
 			// Expected date
 			let date = new Date(body[key]);
 			if (isNaN(date.getTime()) && body[key] !== null) {

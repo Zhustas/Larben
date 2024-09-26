@@ -1,18 +1,19 @@
-import { Response } from 'express';
+import type { Response } from 'express';
 import { Database } from 'sqlite3';
+import type { UserDB, SessionTokenDB } from './classes';
 
 // Get user by id
 function getUserBySessionToken(database: Database, res: Response, sessionToken: string) {
 	const sql = 'SELECT USER_ID FROM SessionTokens WHERE token = ?';
 
-	database.get(sql, sessionToken, (err, row) => {
+	database.get(sql, sessionToken, (err, row: UserDB) => {
 		if (err) {
 			res.send('Error in getting user by id');
 			return console.error(err.message);
 		}
 
 		if (row) {
-			database.get('SELECT * FROM Users WHERE ID = ?', row['USER_ID'], (err, row) => {
+			database.get('SELECT * FROM Users WHERE ID = ?', row.id, (err, row) => {
 				if (err) {
 					res.send('Error in getting user by id');
 					return console.error(err.message);
@@ -68,14 +69,14 @@ function checkSessionTokenForExpiration(database: Database, res: Response, sessi
     `;
 
 	// Get row
-	database.get(sql, sessionToken, (err, row) => {
+	database.get(sql, sessionToken, (err, row: SessionTokenDB) => {
 		if (err) {
 			res.send('Error in getting session token');
 			return console.error(err.message);
 		}
 
 		if (row) {
-			const TOKEN_CREATED: Date = row['TOKEN_CREATED'];
+			const TOKEN_CREATED: Date = row.tokenCreated;
 
 			const plus3Hours = 3 * 60 * 60 * 1000;
 			if (TOKEN_CREATED.getTime() + 1 * 60 * 1000 < new Date().getTime() + plus3Hours) {

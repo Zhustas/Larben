@@ -1,5 +1,5 @@
-const express = require('express');
-const bodyParser = require('body-parser');
+import express from 'express';
+import bodyParser from 'body-parser';
 import { Database } from 'sqlite3';
 require('dotenv').config();
 var cookieParser = require('cookie-parser');
@@ -22,7 +22,7 @@ const jsonParser = bodyParser.json();
 app.use(cookieParser());
 
 app.use((_, res, next) => {
-	res.setHeader('Access-Control-Allow-Origin', 'https://localhost:8080');
+	res.setHeader('Access-Control-Allow-Origin', 'https://localhost:5173');
 	res.setHeader(
 		'Access-Control-Allow-Headers',
 		'Origin, X-Requested-With, Content-Type, Accept, Authorization'

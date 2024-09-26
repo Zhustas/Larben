@@ -1,6 +1,7 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { Database } from 'sqlite3';
 import { insertSessionToken } from './functions';
+import type { UserDB } from './classes';
 
 // Insert user
 function insertUser(database: Database, req: Request, res: Response) {
@@ -37,7 +38,7 @@ function checkCredentials(database: Database, req: Request, res: Response, expir
 	const sql = `SELECT * FROM Users WHERE USERNAME = ? AND PASSWORD = ?`;
 
 	// Find first row where username and password matches
-	database.get(sql, [username, password], (err, row) => {
+	database.get(sql, [username, password], (err, row: UserDB) => {
 		if (err) {
 			res.send('Error in checking credentials');
 			return console.error(err.message);
@@ -45,7 +46,8 @@ function checkCredentials(database: Database, req: Request, res: Response, expir
 
 		// If row is found
 		if (row) {
-			const token = insertSessionToken(database, row['ID']);
+			const user: UserDB = row;
+			const token = insertSessionToken(database, user.id);
 
 			const plus3Hours: number = 3 * 60 * 60 * 1000;
 			res
