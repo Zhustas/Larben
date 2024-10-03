@@ -24,13 +24,13 @@
 
 		// Convert data into object
 		const user = {
-			NAME: name,
-			LAST_NAME: lastName,
-			BIRTH_DATE: date ? date : null,
-			USERNAME: username,
-			EMAIL: email,
-			PASSWORD: password,
-			DESCRIPTION: null
+			name: name,
+			lastName: lastName,
+			birthDate: date ? date : null,
+			username: username,
+			email: email,
+			password: password,
+			description: null
 		};
 
 		// Convert to json
@@ -42,7 +42,7 @@
 
 	function doPOST(userString: string) {
 		const hr = new XMLHttpRequest();
-		hr.open('POST', 'https://localhost:3000/user');
+		hr.open('POST', 'http://localhost:3000/user');
 		hr.setRequestHeader('Content-Type', 'application/json');
 		hr.send(userString);
 		hr.onload = () => {

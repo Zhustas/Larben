@@ -1,10 +1,13 @@
 <script lang="ts">
 	import Cookies from 'js-cookie';
 	import type { UserDB } from '../classes/DatabaseClasses';
+	import { onMount } from 'svelte';
 
 	let user: UserDB;
 
-	getUser();
+	onMount(() => {
+		getUser();
+	});
 
 	function getUser() {
 		const hr = new XMLHttpRequest();

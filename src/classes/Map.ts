@@ -1,7 +1,9 @@
 'use strict';
 
-import { MarkerClusterer } from '@googlemaps/markerclusterer';
-import { Loader } from '@googlemaps/js-api-loader';
+import markerClustererPkg from '@googlemaps/markerclusterer';
+const { MarkerClusterer } = markerClustererPkg;
+import jsApiLoaderPkg from '@googlemaps/js-api-loader';
+const { Loader } = jsApiLoaderPkg;
 import type { UserDB, MarkerDB } from './DatabaseClasses';
 
 export default class Map {
@@ -16,7 +18,7 @@ export default class Map {
 	#currentLatLng: google.maps.LatLngLiteral;
 	#marker: google.maps.marker.AdvancedMarkerElement | undefined;
 	#clickedOnMarker: boolean;
-	#loader: Loader;
+	#loader: InstanceType<typeof Loader>;
 	#mapLibrary: google.maps.MapsLibrary | undefined;
 	#markerLibrary: google.maps.MarkerLibrary | undefined;
 

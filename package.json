@@ -5,8 +5,9 @@
 	"main": "index.js",
 	"scripts": {
 		"dev": "vite dev",
-		"frontend": "npm run dev",
-		"backend": "npm run compile && bun run build/backend/server.js",
+		"f": "npm run dev",
+		"b": "bun run build/backend/server.js",
+		"b:c": "npm run compile && bun run build/backend/server.js",
 		"build": "vite build",
 		"compile": "tsc && tsc-alias",
 		"preview": "vite preview",
@@ -36,7 +37,8 @@
 		"js-cookie": "^3.0.5",
 		"sqlite3": "^5.1.7",
 		"svelte": "^4.2.15",
-		"tsc-alias": "^1.8.10"
+		"tsc-alias": "^1.8.10",
+		"xhr2": "^0.2.1"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.28.1",

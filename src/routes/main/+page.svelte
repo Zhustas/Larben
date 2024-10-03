@@ -1,34 +1,43 @@
 <script lang="ts">
 	import Crier from '../../components/Crier.svelte';
 	import Guild from '../../components/Guild.svelte';
-	import Map from '../../components/Map.svelte';
+	// import Map from '../../components/Map.svelte';
 	import Account from '../../components/Account.svelte';
 
 	import Cookies from 'js-cookie';
+	import { onMount } from 'svelte';
 
-	if (!Cookies.get('sessionToken')) {
-		window.location.assign('/');
-	} else {
-		const hr = new XMLHttpRequest();
-		hr.open('GET', 'https://localhost:3000/checkSessionToken');
-		hr.withCredentials = true;
-		hr.send();
+	onMount(() => {
+		if (!Cookies.get('sessionToken')) {
+			window.location.assign('/');
+		} else {
+			fetch('http://localhost:3000/checkSessionToken', {
+				method: 'GET',
+				credentials: 'include'
+			})
+				.then((response) => {
+					console.log(response);
+				})
+				.catch((error) => {
+					console.log('Caught an error!');
+				});
 
-		hr.onload = () => {
-			const response = hr.response;
+			// hr.onload = () => {
+			// 	const response = hr.response;
 
-			if (response !== 'Session token valid') {
-				const hr2 = new XMLHttpRequest();
-				hr2.open('DELETE', 'https://localhost:3000/sessionToken');
-				hr2.withCredentials = true;
-				hr2.send();
-				hr2.onload = () => {
-					Cookies.remove('sessionToken');
-					window.location.assign('/');
-				};
-			}
-		};
-	}
+			// 	if (response !== 'Session token valid') {
+			// 		const hr2 = new XMLHttpRequest();
+			// 		hr2.open('DELETE', 'https://localhost:3000/sessionToken');
+			// 		hr2.withCredentials = true;
+			// 		hr2.send();
+			// 		hr2.onload = () => {
+			// 			Cookies.remove('sessionToken');
+			// 			window.location.assign('/');
+			// 		};
+			// 	}
+			// };
+		}
+	});
 
 	const Page = {
 		Crier: 'crier',
@@ -103,7 +112,7 @@
 			<Guild />
 		{:else if page === Page.Map}
 			<div bind:this={map} class="map">
-				<Map />
+				<!-- <Map /> -->
 			</div>
 		{:else if page === Page.Account}
 			<Account />

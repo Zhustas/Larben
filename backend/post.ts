@@ -10,7 +10,7 @@ function insertUser(database: Database, req: Request, res: Response) {
 
 	// Create SQL text
 	const sql = `
-      INSERT INTO Users (NAME, LAST_NAME, BIRTH_DATE, USERNAME, EMAIL, PASSWORD, DESCRIPTION, GUILD_ID)
+      INSERT INTO Users (name, lastName, birthDate, username, email, password, description, guildID)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     `;
 

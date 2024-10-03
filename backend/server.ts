@@ -22,12 +22,12 @@ const jsonParser = bodyParser.json();
 app.use(cookieParser());
 
 app.use((_, res, next) => {
-	res.setHeader('Access-Control-Allow-Origin', 'https://localhost:5173');
+	res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
 	res.setHeader(
 		'Access-Control-Allow-Headers',
 		'Origin, X-Requested-With, Content-Type, Accept, Authorization'
 	);
-	res.setHeader('Access-Control-Allow-Methods', 'PUT, DELETE');
+	res.setHeader('Access-Control-Allow-Methods', 'PUT, DELETE, POST');
 	res.setHeader('Access-Control-Allow-Credentials', 'true');
 	next();
 });
@@ -50,16 +50,17 @@ app.get('/user', (req, res) => {
 });
 
 app.get('/users', (req, res) => {
-	const sessionToken = req.cookies['sessionToken'];
+	getUsers(database, res);
+	// const sessionToken = req.cookies['sessionToken'];
 
-	function callback(tokenExists: boolean) {
-		if (tokenExists) {
-			getUsers(database, res);
-		} else {
-			res.send('Error');
-		}
-	}
-	checkSessionTokenExists(database, sessionToken, callback);
+	// function callback(tokenExists: boolean) {
+	// 	if (tokenExists) {
+	// 		getUsers(database, res);
+	// 	} else {
+	// 		res.send('Error');
+	// 	}
+	// }
+	// checkSessionTokenExists(database, sessionToken, callback);
 });
 
 app.get('/posts', (req, res) => {
@@ -107,13 +108,13 @@ app.get('/checkSessionToken', (req, res) => {
 
 app.post('/user', jsonParser, (req, res) => {
 	const expectations = {
-		NAME: 'string',
-		LAST_NAME: 'string',
-		BIRTH_DATE: 'date',
-		USERNAME: 'string',
-		EMAIL: 'string',
-		PASSWORD: 'string',
-		DESCRIPTION: 'string'
+		name: 'string',
+		lastName: 'string',
+		birthDate: 'date',
+		username: 'string',
+		email: 'string',
+		password: 'string',
+		description: 'string'
 	};
 
 	if (!validRequestBody(req, expectations)) {
@@ -130,7 +131,7 @@ app.post('/checkCredentials', jsonParser, (req, res) => {
 		PASSWORD: 'string'
 	};
 
-	if (!validRequestBody(req.body, expectations)) {
+	if (!validRequestBody(req, expectations)) {
 		res.send('Error in request body');
 		return;
 	}
@@ -148,7 +149,7 @@ app.post('/post', jsonParser, (req, res) => {
 		LIKES: 'int'
 	};
 
-	if (!validRequestBody(req.body, expectations)) {
+	if (!validRequestBody(req, expectations)) {
 		res.send('Error in request body');
 		return;
 	}
@@ -173,14 +174,10 @@ app.post('/marker', jsonParser, (req, res) => {
 		LONGITUDE: 'double'
 	};
 
-	console.log('asss');
-
-	if (!validRequestBody(req.body, expectations)) {
+	if (!validRequestBody(req, expectations)) {
 		res.send('Error in request body');
 		return;
 	}
-
-	console.log('as');
 
 	function callback(tokenExists: boolean) {
 		if (tokenExists) {
@@ -249,7 +246,7 @@ app.put('/user/:id', jsonParser, (req, res) => {
 		DESCRIPTION: 'string'
 	};
 
-	if (!validRequestBody(req.body, expectations)) {
+	if (!validRequestBody(req, expectations)) {
 		res.send('Error in request body');
 		return;
 	}
@@ -271,7 +268,7 @@ app.put('/post/:id', jsonParser, (req, res) => {
 		LIKES: 'int'
 	};
 
-	if (!validRequestBody(req.body, expectations)) {
+	if (!validRequestBody(req, expectations)) {
 		res.send('Error in request body');
 		return;
 	}

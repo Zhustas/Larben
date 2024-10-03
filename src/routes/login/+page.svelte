@@ -3,7 +3,7 @@
 
 	if (Cookies.get('sessionToken')) {
 		const hr = new XMLHttpRequest();
-		hr.open('GET', 'https://localhost:3000/checkSessionToken');
+		hr.open('GET', 'http://localhost:3000/checkSessionToken');
 		hr.withCredentials = true;
 		hr.send();
 
@@ -14,7 +14,7 @@
 
 			if (response !== 'Session token valid') {
 				const hr2 = new XMLHttpRequest();
-				hr2.open('DELETE', 'https://localhost:3000/sessionToken');
+				hr2.open('DELETE', 'http://localhost:3000/sessionToken');
 				hr2.withCredentials = true;
 				hr2.send();
 				hr2.onload = () => {
@@ -45,7 +45,7 @@
 
 	function doPOST(userString: string) {
 		const hr = new XMLHttpRequest();
-		hr.open('POST', 'https://localhost:3000/checkCredentials');
+		hr.open('POST', 'http://localhost:3000/checkCredentials');
 		hr.setRequestHeader('Content-Type', 'application/json');
 		hr.withCredentials = true;
 		hr.send(userString);

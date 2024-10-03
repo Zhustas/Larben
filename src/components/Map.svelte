@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { UserDB } from '../classes/DatabaseClasses';
 	import Map from '../classes/Map';
 
@@ -23,11 +24,13 @@
 	let user: UserDB;
 	let users: UserDB[] = [];
 
-	(async function () {
-		await getUser();
-		await getAllUsers();
-		await loadMarkers();
-	})();
+	onMount(() => {
+		(async function () {
+			await getUser();
+			await getAllUsers();
+			await loadMarkers();
+		})();
+	});
 
 	async function getUser() {
 		const hr = new XMLHttpRequest();

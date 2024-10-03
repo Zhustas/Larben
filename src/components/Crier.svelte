@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { PostDB, UserDB } from '../classes/DatabaseClasses';
 
 	// The town crier (šauklys) used to make public announcements in the streets.
@@ -11,9 +12,11 @@
 	let user: UserDB;
 	let users: UserDB[] = [];
 
-	getUser();
-	getAllUsers();
-	getPosts();
+	onMount(() => {
+		getUser();
+		getAllUsers();
+		getPosts();
+	});
 
 	function getUser() {
 		const hr = new XMLHttpRequest();

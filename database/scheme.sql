@@ -1,13 +1,13 @@
 CREATE TABLE Users (
-    ID           INTEGER PRIMARY KEY AUTOINCREMENT,
-    NAME         TEXT    NOT NULL,
-    LAST_NAME    TEXT    NOT NULL,
-    BIRTH_DATE   DATE,
-    USERNAME     TEXT    NOT NULL UNIQUE,
-    EMAIL        TEXT    NOT NULL UNIQUE,
-    PASSWORD     TEXT    NOT NULL,
-    DESCRIPTION  TEXT,
-    GUILD_ID     INTEGER
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT    NOT NULL,
+    lastName    TEXT    NOT NULL,
+    birthDate   DATE,
+    username     TEXT    NOT NULL UNIQUE,
+    email        TEXT    NOT NULL UNIQUE,
+    password     TEXT    NOT NULL,
+    description  TEXT,
+    guildId     INTEGER
 );
 
 CREATE TABLE SessionTokens (
